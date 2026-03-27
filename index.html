@@ -2,154 +2,107 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL 1.0</title>
+    <title>PIXEL 1.0 PRO</title>
     <style>
         :root {
-            --bg: #050505;
-            --panel: #121212;
-            --accent: #00ffa3;
-            --text: #ffffff;
-            --gray: #222;
+            --bg: #050505; --panel: #121212; --accent: #00ffa3; --text: #ffffff; --border: #222; --post-bg: #181818;
+        }
+        body.light-theme {
+            --bg: #f0f2f5; --panel: #ffffff; --accent: #00b371; --text: #1c1e21; --border: #ddd; --post-bg: #f9f9f9;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
-        .container { display: flex; width: 100%; max-width: 1400px; gap: 20px; padding: 20px; height: 100%; }
+        .container { display: flex; width: 100%; max-width: 1200px; gap: 15px; padding: 15px; height: 100%; }
 
-        /* Sidebar */
-        .sidebar { width: 300px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
-        .logo-box { 
-            background: linear-gradient(45deg, #111, #222);
-            border: 1px solid #333;
-            border-radius: 25px; 
-            padding: 30px; 
-            text-align: center; 
-        }
-        .logo-box h1 { font-size: 24px; letter-spacing: 8px; font-weight: 900; color: var(--accent); text-shadow: 0 0 15px var(--accent); }
-        .version { font-size: 10px; opacity: 0.5; letter-spacing: 2px; margin-top: 5px; }
+        /* Sidebar - Компактный */
+        .sidebar { width: 240px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        .logo-box { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 15px; text-align: center; }
+        .logo-box h1 { font-size: 18px; letter-spacing: 4px; color: var(--accent); }
 
         .nav-btn { 
-            background: var(--panel); 
-            border: 1px solid #222; 
-            border-radius: 20px; 
-            padding: 18px 25px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            color: var(--text);
-            transition: 0.3s;
+            background: var(--panel); border: 1px solid var(--border); border-radius: 15px; 
+            padding: 12px 18px; cursor: pointer; font-weight: 600; display: flex; 
+            justify-content: space-between; align-items: center; color: var(--text); font-size: 13px;
         }
-        .nav-btn:hover { background: #1a1a1a; border-color: var(--accent); }
-        .nav-btn.active { border-color: var(--accent); background: rgba(0, 255, 163, 0.05); }
-
-        .btn-inventory { 
-            margin-top: auto; 
-            background: var(--accent); 
-            color: black; 
-            justify-content: center; 
-            gap: 10px; 
-            text-decoration: none; 
-            border: none;
-        }
+        .nav-btn:hover, .nav-btn.active { border-color: var(--accent); background: rgba(0, 255, 163, 0.05); }
 
         /* Main Content */
         .main-content { 
-            flex-grow: 1; 
-            background: var(--panel); 
-            border: 1px solid #222;
-            border-radius: 40px; 
-            padding: 30px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 25px; 
+            flex-grow: 1; background: var(--panel); border: 1px solid var(--border);
+            border-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; 
         }
 
-        /* Search Section */
-        .search-container { position: sticky; top: 0; background: var(--panel); z-index: 10; padding-bottom: 15px; }
-        .search-input { 
-            width: 100%; 
-            background: #1a1a1a; 
-            border: 1px solid #333; 
-            padding: 18px; 
-            border-radius: 20px; 
-            color: white; 
-            font-size: 16px;
-            outline: none;
-        }
-        .search-input:focus { border-color: var(--accent); }
+        /* Посты */
+        .post { background: var(--post-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 10px; }
+        .post-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
+        .hashtag { color: var(--accent); cursor: pointer; }
+        .post-actions { display: flex; gap: 15px; margin-top: 15px; font-size: 13px; }
+        .action-link { cursor: pointer; opacity: 0.7; }
+        .action-link:hover { opacity: 1; color: var(--accent); }
 
-        /* Create Post */
-        .create-post { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 1px solid #333; }
-        textarea { width: 100%; background: transparent; border: none; color: white; resize: none; outline: none; font-size: 16px; }
-        .post-tools { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
-        .publish-btn { background: var(--accent); color: black; border: none; padding: 10px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        /* Окна разделов */
+        .section { display: none; animation: fadeIn 0.2s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Feed */
-        .post { background: #181818; border-radius: 25px; padding: 25px; border: 1px solid #222; }
-        .post-user { color: var(--accent); font-weight: bold; margin-bottom: 10px; display: block; }
-        .post-img { width: 100%; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
-        
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: #111; padding: 40px; border-radius: 35px; width: 380px; text-align: center; border: 1px solid #333; }
+        /* Инвентарь */
+        .btn-inv { background: var(--accent) !important; color: #000 !important; justify-content: center !important; margin-top: auto; }
+
+        /* Темы */
+        .theme-toggle { margin-top: 10px; font-size: 11px; text-align: center; cursor: pointer; opacity: 0.5; }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
     <div class="container">
         <aside class="sidebar">
-            <div class="logo-box">
-                <h1>PIXEL</h1>
-                <div class="version">VERSION 1.0</div>
-            </div>
+            <div class="logo-box"><h1>PIXEL 1.0</h1></div>
             
-            <button id="login-trigger" class="nav-btn" onclick="openModal()">ВХОД <span>👤</span></button>
-            <div id="user-badge" style="display:none; padding: 10px; text-align: center; border: 1px dashed var(--accent); border-radius: 15px;">
-                <span id="user-name"></span>
-                <button onclick="logout()" style="display:block; margin: 5px auto; color: red; background:none; border:none; cursor:pointer;">Выйти</button>
-            </div>
-
-            <button class="nav-btn active" id="btn-posts" onclick="switchTab('posts')">ПОСТЫ <span>🏠</span></button>
-            <button class="nav-btn" id="btn-search" onclick="switchTab('search')">ПОИСК <span>🔍</span></button>
+            <button class="nav-btn active" onclick="showSec('posts')">ЛЕНТА <span>🏠</span></button>
+            <button class="nav-btn" onclick="showSec('subs')">ПОДПИСКИ <span>👥</span></button>
+            <button class="nav-btn" onclick="showSec('notif')">УВЕДОМЛЕНИЯ <span id="notif-count">0</span></button>
+            <button class="nav-btn" onclick="showSec('search')">ПОИСК <span>🔍</span></button>
+            <button class="nav-btn" onclick="showSec('settings')">НАСТРОЙКИ <span>⚙️</span></button>
             
-            <a href="https://world-pixel-ten.vercel.app/" class="nav-btn btn-inventory">ИНВЕНТ</a>
+            <a href="https://world-pixel-ten.vercel.app/" class="nav-btn btn-inv">ИНВЕНТАРЬ 📦</a>
+            <div class="theme-toggle" onclick="toggleTheme()">СМЕНИТЬ ТЕМУ 🌓</div>
         </aside>
 
         <main class="main-content">
-            <div id="search-area" class="search-container" style="display:none;">
-                <input type="text" id="search-query" class="search-input" placeholder="Поиск по тексту поста..." oninput="handleSearch()">
+            <div id="sec-posts" class="section active">
+                <div id="editor" style="display:none; margin-bottom:20px;">
+                    <textarea id="p-text" placeholder="Что нового? (Используй #хештеги)" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:10px;"></textarea>
+                    <button onclick="sendPost()" style="background:var(--accent); border:none; padding:8px 20px; border-radius:10px; margin-top:5px; cursor:pointer;">Опубликовать</button>
+                </div>
+                <div id="feed">Загрузка...</div>
             </div>
 
-            <div id="editor" class="create-post" style="display:none;">
-                <textarea id="p-text" placeholder="Что нового в PIXEL 1.0?" rows="3"></textarea>
-                <input type="text" id="p-img" placeholder="Ссылка на фото (необязательно)" style="width:100%; background:none; border:none; color: #888; margin-top:10px;">
-                <div class="post-tools">
-                    <span style="font-size: 12px; color: #666;">PIXEL COMMUNITY</span>
-                    <button class="publish-btn" onclick="sendPost()">ОПУБЛИКОВАТЬ</button>
+            <div id="sec-search" class="section">
+                <input type="text" oninput="doSearch(this.value)" placeholder="Поиск по хештегам или тексту..." style="width:100%; padding:15px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:15px;">
+                <div id="search-results" style="margin-top:20px;"></div>
+            </div>
+
+            <div id="sec-notif" class="section">
+                <h2>Уведомления</h2>
+                <div id="notif-list" style="margin-top:20px; opacity:0.6;">У вас нет новых уведомлений</div>
+            </div>
+
+            <div id="sec-settings" class="section">
+                <h2>Настройки</h2>
+                <div style="margin-top:20px;">
+                    <button class="nav-btn" onclick="openAuth()">АВТОРИЗАЦИЯ 👤</button>
+                    <p style="margin-top:20px; font-size:12px; opacity:0.5;">PIXEL 1.0 PRO Build 2026</p>
                 </div>
             </div>
-
-            <div id="feed">Загрузка контента...</div>
         </main>
-    </div>
-
-    <div class="modal" id="authModal">
-        <div class="modal-box">
-            <h2 style="margin-bottom: 20px;">АВТОРИЗАЦИЯ</h2>
-            <button class="nav-btn" style="width:100%; margin-bottom:10px; justify-content:center;" onclick="login('google')">GOOGLE</button>
-            <button class="nav-btn" style="width:100%; justify-content:center;" onclick="login('github')">GITHUB</button>
-            <p onclick="closeModal()" style="margin-top:20px; cursor:pointer; opacity: 0.5;">Закрыть</p>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
@@ -163,78 +116,85 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
         let user = null;
-        let allPosts = [];
+        let postsData = [];
 
-        // --- Переключение Табов ---
-        window.switchTab = (tab) => {
-            document.getElementById('search-area').style.display = tab === 'search' ? 'block' : 'none';
-            document.getElementById('btn-posts').classList.toggle('active', tab === 'posts');
-            document.getElementById('btn-search').classList.toggle('active', tab === 'search');
-            if(tab === 'posts') renderPosts(allPosts);
+        // Переключение тем
+        window.toggleTheme = () => document.body.classList.toggle('light-theme');
+
+        // Навигация
+        window.showSec = (id) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         };
 
-        // --- Поиск ---
-        window.handleSearch = () => {
-            const val = document.getElementById('search-query').value.toLowerCase();
-            const filtered = allPosts.filter(p => p.text.toLowerCase().includes(val));
-            renderPosts(filtered);
+        // Хештеги
+        const formatText = (text) => text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+
+        // Лайки
+        window.like = async (id, likes) => {
+            if(!user) return alert("Войди!");
+            const ref = doc(db, "posts", id);
+            await updateDoc(ref, { likes: likes.includes(user.uid) ? arrayRemove(user.uid) : arrayUnion(user.uid) });
         };
 
-        // --- Auth ---
-        window.openModal = () => document.getElementById('authModal').style.display = 'flex';
-        window.closeModal = () => document.getElementById('authModal').style.display = 'none';
-        window.login = async (m) => {
-            const p = m === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
-            await signInWithPopup(auth, p);
-            closeModal();
+        // Жалобы на пользователя
+        window.reportUser = async (uid) => {
+            const reason = prompt("Причина жалобы на пользователя:");
+            if(reason) {
+                await addDoc(collection(db, "user_reports"), { target: uid, reason, reporter: user?.uid, date: new Date() });
+                alert("Жалоба на пользователя отправлена");
+            }
         };
-        window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, (u) => {
             user = u;
-            document.getElementById('login-trigger').style.display = u ? 'none' : 'flex';
-            document.getElementById('user-badge').style.display = u ? 'block' : 'none';
             document.getElementById('editor').style.display = u ? 'block' : 'none';
-            if(u) document.getElementById('user-name').innerText = u.displayName;
             initFeed();
         });
 
-        // --- База данных ---
         function initFeed() {
-            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                renderPosts(allPosts);
+            onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (snap) => {
+                postsData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render(postsData, 'feed');
             });
         }
 
-        function renderPosts(data) {
-            const feed = document.getElementById('feed');
-            feed.innerHTML = "";
+        function render(data, targetId) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = "";
             data.forEach(p => {
-                feed.innerHTML += `
+                container.innerHTML += `
                     <div class="post">
-                        <span class="post-user">@${p.authorName}</span>
-                        <div>${p.text}</div>
-                        ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-img">` : ''}
+                        <div class="post-header">
+                            <b onclick="reportUser('${p.authorId}')" style="cursor:help">@${p.authorName}</b>
+                            <span>${p.createdAt ? 'Active' : '...'}</span>
+                        </div>
+                        <div class="post-content">${formatText(p.text)}</div>
+                        <div class="post-actions">
+                            <span class="action-link" onclick="like('${p.id}', ${JSON.stringify(p.likes || [])})">❤️ ${p.likes?.length || 0}</span>
+                            <span class="action-link">💬 0</span>
+                            <span class="action-link" onclick="alert('Репорт поста отправлен')">⚠️</span>
+                        </div>
                     </div>`;
             });
         }
 
         window.sendPost = async () => {
-            const txt = document.getElementById('p-text').value;
-            const img = document.getElementById('p-img').value;
-            if(!txt.trim()) return;
+            const text = document.getElementById('p-text').value;
+            if(!text) return;
             await addDoc(collection(db, "posts"), {
-                text: txt, imageUrl: img,
-                authorId: user.uid, authorName: user.displayName,
-                createdAt: serverTimestamp()
+                text, authorId: user.uid, authorName: user.displayName,
+                likes: [], createdAt: serverTimestamp()
             });
             document.getElementById('p-text').value = "";
-            document.getElementById('p-img').value = "";
         };
+
+        window.openAuth = () => signInWithPopup(auth, new GoogleAuthProvider());
+        window.doSearch = (val) => render(postsData.filter(p => p.text.toLowerCase().includes(val.toLowerCase())), 'search-results');
+
     </script>
 </body>
 </html>
