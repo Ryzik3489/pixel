@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL v2.0</title>
+    <title>PIXEL v2.1 Full Beta</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root { --bg: #0b0b0d; --panel: #1c1c1e; --accent: #007bff; --text: #ffffff; --gray: #8e8e93; --border: #2c2c2e; }
@@ -15,34 +15,53 @@
         .nav-btn:hover, .nav-btn.active { background: var(--panel); color: var(--text); }
 
         .main-content { flex-grow: 1; overflow-y: auto; scrollbar-width: none; }
+        .section { display: none; padding-bottom: 50px; }
+        .section.active { display: block; }
+
         .post { background: var(--panel); width: 100%; max-width: 600px; border-radius: 20px; padding: 20px; margin: 15px auto; border: 1px solid #222; }
-        
         .editor { background: var(--panel); max-width: 600px; margin: 20px auto; border-radius: 25px; padding: 25px; }
-        textarea { width: 100%; background: none; border: none; color: white; outline: none; resize: none; font-size: 18px; min-height: 40px; }
+        textarea { width: 100%; background: none; border: none; color: white; outline: none; resize: none; font-size: 18px; min-height: 60px; }
         
         .post-actions { display: flex; gap: 25px; margin-top: 15px; color: var(--gray); font-size: 14px; }
         .action { cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .btn-pub { background: #d1d1d6; color: black; border: none; padding: 10px 28px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        input[type="text"] { width: 100%; max-width: 600px; display: block; margin: 20px auto; background: var(--panel); border: 1px solid var(--border); padding: 12px 20px; border-radius: 30px; color: white; outline: none; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
         <div class="logo">ИТД <span>v1.1 beta</span></div>
-        <div class="nav-btn active"><i class="bi bi-house-door-fill"></i> Лента</div>
-        <div class="nav-btn"><i class="bi bi-search"></i> Поиск</div>
-        <div class="nav-btn"><i class="bi bi-person"></i> Профиль</div>
+        <div class="nav-btn active" onclick="nav('feed', this)"><i class="bi bi-house-door-fill"></i> Лента</div>
+        <div class="nav-btn" onclick="nav('search', this)"><i class="bi bi-search"></i> Поиск</div>
+        <div class="nav-btn" onclick="nav('profile', this)"><i class="bi bi-person"></i> Профиль</div>
         <div class="nav-btn" style="margin-top:auto; color:#ff453a;" onclick="logout()"><i class="bi bi-box-arrow-left"></i> Выйти</div>
     </aside>
 
     <main class="main-content">
-        <div class="editor">
-            <textarea id="post-text" placeholder="Что нового?"></textarea>
-            <div style="display:flex; justify-content:flex-end; margin-top:15px;">
-                <button class="btn-pub" onclick="sendPost()">Опубликовать</button>
+        <div id="sec-feed" class="section active">
+            <div class="editor">
+                <textarea id="post-text" placeholder="Что нового?"></textarea>
+                <div style="display:flex; justify-content:flex-end; margin-top:15px;">
+                    <button class="btn-pub" onclick="sendPost()">Опубликовать</button>
+                </div>
             </div>
+            <div id="feed-items"></div>
         </div>
-        <div id="feed-items"></div>
+
+        <div id="sec-search" class="section">
+            <input type="text" id="search-input" oninput="doSearch(this.value)" placeholder="Поиск постов...">
+            <div id="search-items"></div>
+        </div>
+
+        <div id="sec-profile" class="section">
+            <div style="text-align:center; padding:40px;">
+                <div id="p-av" style="width:100px; height:100px; border-radius:50%; background-size:cover; margin:0 auto 15px; border:2px solid #333;"></div>
+                <h2 id="p-name">Загрузка...</h2>
+                <p style="color:gray; margin-top:10px;">Ваши публикации:</p>
+            </div>
+            <div id="profile-items"></div>
+        </div>
     </main>
 
     <script type="module">
@@ -54,47 +73,62 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let user = null;
+        let user = null, allPosts = [];
 
         onAuthStateChanged(auth, (u) => { 
-            if(u) { user = u; initApp(); } 
-            else { signInWithPopup(auth, new GoogleAuthProvider()); } 
+            if(u) { 
+                user = u; 
+                document.getElementById('p-name').innerText = u.displayName;
+                document.getElementById('p-av').style.backgroundImage = `url(${u.photoURL})`;
+                initApp(); 
+            } else { signInWithPopup(auth, new GoogleAuthProvider()); } 
         });
 
         window.logout = () => signOut(auth).then(() => location.reload());
 
+        // НАВИГАЦИЯ
+        window.nav = (id, btn) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-'+id).classList.add('active');
+            btn.classList.add('active');
+            if(id === 'profile') render(allPosts.filter(p => p.uid === user.uid), 'profile-items');
+        };
+
         function initApp() {
             onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), (snap) => {
-                const container = document.getElementById('feed-items');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const p = d.data();
-                    const isLiked = p.likes?.includes(user.uid);
-                    const viewCount = p.viewers ? p.viewers.length : 0; // Считаем уникальных людей
+                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render(allPosts, 'feed-items');
+            });
+        }
 
-                    container.innerHTML += `
-                        <div class="post">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                                <div style="display:flex; gap:10px; align-items:center;">
-                                    <div style="width:35px; height:35px; border-radius:50%; background:url(${p.av}); background-size:cover;"></div>
-                                    <b>${p.author}</b>
-                                </div>
-                                ${p.uid === user.uid ? `<i class="bi bi-trash action" style="color:#ff453a" onclick="deletePost('${d.id}')"></i>` : ''}
+        function render(data, targetId) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = "";
+            data.forEach(p => {
+                const isLiked = p.likes?.includes(user.uid);
+                const views = p.viewers ? p.viewers.length : 0;
+                
+                container.innerHTML += `
+                    <div class="post" onmouseover="addView('${p.id}')">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <div style="width:35px; height:35px; border-radius:50%; background:url(${p.av}); background-size:cover;"></div>
+                                <b>${p.author}</b>
                             </div>
-                            <div style="font-size:16px;">${p.text}</div>
-                            <div class="post-actions">
-                                <div class="action" onclick="like('${d.id}', ${JSON.stringify(p.likes)})">
-                                    <i class="bi ${isLiked?'bi-heart-fill':'bi-heart'}" style="${isLiked?'color:#ff2d55':''}"></i> ${p.likes?.length || 0}
-                                </div>
-                                <div class="action"><i class="bi bi-graph-up"></i> ${viewCount}</div>
+                            <div style="display:flex; gap:15px;">
+                                ${p.uid === user.uid ? `<i class="bi bi-trash action" style="color:#ff453a" onclick="deletePost('${p.id}')"></i>` : ''}
+                                <i class="bi bi-exclamation-octagon action" onclick="report('${p.id}', '${p.author}')"></i>
                             </div>
-                        </div>`;
-                    
-                    // Умный просмотр: добавляем твой ID в список тех, кто видел пост
-                    if (!p.viewers?.includes(user.uid)) {
-                        updateDoc(doc(db, "posts", d.id), { viewers: arrayUnion(user.uid) });
-                    }
-                });
+                        </div>
+                        <div style="font-size:16px;">${p.text}</div>
+                        <div class="post-actions">
+                            <div class="action" onclick="like('${p.id}', ${JSON.stringify(p.likes)})">
+                                <i class="bi ${isLiked?'bi-heart-fill':'bi-heart'}" style="${isLiked?'color:#ff2d55':''}"></i> ${p.likes?.length || 0}
+                            </div>
+                            <div class="action"><i class="bi bi-graph-up"></i> ${views}</div>
+                        </div>
+                    </div>`;
             });
         }
 
@@ -108,10 +142,27 @@
             document.getElementById('post-text').value = "";
         };
 
-        window.deletePost = async (id) => { if(confirm("Удалить?")) await deleteDoc(doc(db, "posts", id)); };
+        window.addView = async (id) => {
+            const p = allPosts.find(x => x.id === id);
+            if (p && !p.viewers?.includes(user.uid)) {
+                await updateDoc(doc(db, "posts", id), { viewers: arrayUnion(user.uid) });
+            }
+        };
+
         window.like = async (id, likes) => {
             const r = doc(db, "posts", id);
             await updateDoc(r, { likes: likes.includes(user.uid) ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+        };
+
+        window.deletePost = async (id) => { if(confirm("Удалить этот пост?")) await deleteDoc(doc(db, "posts", id)); };
+
+        window.doSearch = (val) => {
+            const filtered = allPosts.filter(p => p.text.toLowerCase().includes(val.toLowerCase()));
+            render(filtered, 'search-items');
+        };
+
+        window.report = (id, author) => {
+            window.location.href = `mailto:ryzik3489@gmail.com?subject=REPORT&body=PostID: ${id}\nUser: ${author}`;
         };
     </script>
 </body>
