@@ -2,100 +2,154 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL PRO - Social</title>
+    <title>PIXEL 1.0</title>
     <style>
         :root {
-            --bg-dark: #333333;
-            --panel-gray: #8c8c8c;
-            --button-gray: #6e6e6e;
-            --accent: #00ffcc; /* Цвет для важных элементов */
+            --bg: #050505;
+            --panel: #121212;
+            --accent: #00ffa3;
+            --text: #ffffff;
+            --gray: #222;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-dark); display: flex; justify-content: center; padding: 20px; color: white; height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
-        .container { display: flex; width: 100%; max-width: 1300px; gap: 20px; height: 95vh; }
+        .container { display: flex; width: 100%; max-width: 1400px; gap: 20px; padding: 20px; height: 100%; }
 
         /* Sidebar */
-        .sidebar { background: var(--panel-gray); width: 300px; border-radius: 35px; padding: 25px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
-        .logo-box { background: var(--button-gray); border-radius: 20px; padding: 25px; text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 5px; color: white; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
-        
-        .nav-btn { background: var(--button-gray); border: none; border-radius: 20px; padding: 15px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: black; transition: 0.2s; }
-        .nav-btn:hover { background: #555; color: white; transform: translateX(5px); }
-        
-        /* Огромная кнопка инвента */
-        .btn-inventory { background: #444; color: var(--accent); border: 2px solid var(--accent); padding: 20px; font-size: 18px; margin-top: auto; justify-content: center; gap: 10px; }
-        .btn-inventory:hover { background: var(--accent); color: black; }
+        .sidebar { width: 300px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
+        .logo-box { 
+            background: linear-gradient(45deg, #111, #222);
+            border: 1px solid #333;
+            border-radius: 25px; 
+            padding: 30px; 
+            text-align: center; 
+        }
+        .logo-box h1 { font-size: 24px; letter-spacing: 8px; font-weight: 900; color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+        .version { font-size: 10px; opacity: 0.5; letter-spacing: 2px; margin-top: 5px; }
 
-        /* Контент */
-        .main-content { flex-grow: 1; background: var(--panel-gray); border-radius: 35px; padding: 25px; overflow-y: auto; color: black; display: flex; flex-direction: column; gap: 20px; }
+        .nav-btn { 
+            background: var(--panel); 
+            border: 1px solid #222; 
+            border-radius: 20px; 
+            padding: 18px 25px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: var(--text);
+            transition: 0.3s;
+        }
+        .nav-btn:hover { background: #1a1a1a; border-color: var(--accent); }
+        .nav-btn.active { border-color: var(--accent); background: rgba(0, 255, 163, 0.05); }
 
-        /* Создание поста */
-        .create-post { background: #555; padding: 20px; border-radius: 25px; display: flex; flex-direction: column; gap: 10px; }
-        .create-post textarea { width: 100%; padding: 12px; border-radius: 15px; border: none; background: #eee; resize: none; font-size: 14px; }
-        .create-post input { width: 100%; padding: 10px; border-radius: 12px; border: none; background: #ddd; }
-        .btn-publish { background: black; color: white; padding: 12px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-inventory { 
+            margin-top: auto; 
+            background: var(--accent); 
+            color: black; 
+            justify-content: center; 
+            gap: 10px; 
+            text-decoration: none; 
+            border: none;
+        }
 
-        /* Посты */
-        .post { background: var(--button-gray); border-radius: 25px; padding: 20px; color: white; position: relative; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            background: var(--panel); 
+            border: 1px solid #222;
+            border-radius: 40px; 
+            padding: 30px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+        }
+
+        /* Search Section */
+        .search-container { position: sticky; top: 0; background: var(--panel); z-index: 10; padding-bottom: 15px; }
+        .search-input { 
+            width: 100%; 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            padding: 18px; 
+            border-radius: 20px; 
+            color: white; 
+            font-size: 16px;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--accent); }
+
+        /* Create Post */
+        .create-post { background: #1a1a1a; padding: 20px; border-radius: 25px; border: 1px solid #333; }
+        textarea { width: 100%; background: transparent; border: none; color: white; resize: none; outline: none; font-size: 16px; }
+        .post-tools { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+        .publish-btn { background: var(--accent); color: black; border: none; padding: 10px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* Feed */
+        .post { background: #181818; border-radius: 25px; padding: 25px; border: 1px solid #222; }
+        .post-user { color: var(--accent); font-weight: bold; margin-bottom: 10px; display: block; }
+        .post-img { width: 100%; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
         
-        .post-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #ccc; }
-        .post-text { font-size: 16px; line-height: 1.5; margin-bottom: 10px; }
-        .post-img { width: 100%; border-radius: 15px; margin-top: 10px; object-fit: cover; max-height: 400px; }
-        
-        .post-footer { display: flex; gap: 15px; margin-top: 15px; align-items: center; }
-        .like-btn { background: none; border: 1px solid #999; color: white; padding: 5px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .like-btn.active { background: #ff4757; border-color: #ff4757; }
-        .delete-btn { background: none; border: none; color: #ffbcbc; cursor: pointer; font-size: 12px; margin-left: auto; }
-
-        /* Модалка */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--panel-gray); padding: 40px; border-radius: 40px; width: 350px; text-align: center; }
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: #111; padding: 40px; border-radius: 35px; width: 380px; text-align: center; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <aside class="sidebar">
-            <div class="logo-box">PIXEL</div>
+            <div class="logo-box">
+                <h1>PIXEL</h1>
+                <div class="version">VERSION 1.0</div>
+            </div>
             
-            <button id="login-btn" class="nav-btn" onclick="openModal()">ВХОД <span>👤</span></button>
-            <div id="user-info" style="display:none; background: #444; padding: 15px; border-radius: 20px; text-align: center;">
-                <div id="user-name" style="font-weight: bold; margin-bottom: 5px;"></div>
-                <button onclick="logout()" style="color: #ff4757; background: none; border: none; cursor: pointer; font-size: 12px;">Выйти</button>
+            <button id="login-trigger" class="nav-btn" onclick="openModal()">ВХОД <span>👤</span></button>
+            <div id="user-badge" style="display:none; padding: 10px; text-align: center; border: 1px dashed var(--accent); border-radius: 15px;">
+                <span id="user-name"></span>
+                <button onclick="logout()" style="display:block; margin: 5px auto; color: red; background:none; border:none; cursor:pointer;">Выйти</button>
             </div>
 
-            <button class="nav-btn" onclick="document.getElementById('feed').scrollIntoView()">ПОСТЫ <span>🏠</span></button>
-            <button class="nav-btn">ПОИСК <span>🔍</span></button>
+            <button class="nav-btn active" id="btn-posts" onclick="switchTab('posts')">ПОСТЫ <span>🏠</span></button>
+            <button class="nav-btn" id="btn-search" onclick="switchTab('search')">ПОИСК <span>🔍</span></button>
             
             <a href="https://world-pixel-ten.vercel.app/" class="nav-btn btn-inventory">ИНВЕНТАРЬ 📦</a>
         </aside>
 
         <main class="main-content">
-            <div id="create-post-area" class="create-post" style="display: none;">
-                <textarea id="post-text" placeholder="Что у тебя на уме?" rows="3"></textarea>
-                <input type="text" id="post-img-url" placeholder="Ссылка на картинку (URL)">
-                <button class="btn-publish" onclick="publishPost()">ОПУБЛИКОВАТЬ</button>
+            <div id="search-area" class="search-container" style="display:none;">
+                <input type="text" id="search-query" class="search-input" placeholder="Поиск по тексту поста..." oninput="handleSearch()">
             </div>
 
-            <div id="feed">Загрузка...</div>
+            <div id="editor" class="create-post" style="display:none;">
+                <textarea id="p-text" placeholder="Что нового в PIXEL 1.0?" rows="3"></textarea>
+                <input type="text" id="p-img" placeholder="Ссылка на фото (необязательно)" style="width:100%; background:none; border:none; color: #888; margin-top:10px;">
+                <div class="post-tools">
+                    <span style="font-size: 12px; color: #666;">PIXEL COMMUNITY</span>
+                    <button class="publish-btn" onclick="sendPost()">ОПУБЛИКОВАТЬ</button>
+                </div>
+            </div>
+
+            <div id="feed">Загрузка контента...</div>
         </main>
     </div>
 
-    <div class="modal-overlay" id="authModal">
-        <div class="modal-content">
-            <h3 style="color:black; margin-bottom:20px;">ВХОД В PIXEL</h3>
-            <button class="btn-publish" style="width:100%; margin-bottom:10px; background:#db4437" onclick="login('google')">Google</button>
-            <button class="btn-publish" style="width:100%; background:#333" onclick="login('github')">GitHub</button>
-            <p onclick="closeModal()" style="margin-top:20px; cursor:pointer; font-size:12px; color: #444;">Отмена</p>
+    <div class="modal" id="authModal">
+        <div class="modal-box">
+            <h2 style="margin-bottom: 20px;">АВТОРИЗАЦИЯ</h2>
+            <button class="nav-btn" style="width:100%; margin-bottom:10px; justify-content:center;" onclick="login('google')">GOOGLE</button>
+            <button class="nav-btn" style="width:100%; justify-content:center;" onclick="login('github')">GITHUB</button>
+            <p onclick="closeModal()" style="margin-top:20px; cursor:pointer; opacity: 0.5;">Закрыть</p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
@@ -109,97 +163,77 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let currentUser = null;
 
-        // Вход / Выход
+        let user = null;
+        let allPosts = [];
+
+        // --- Переключение Табов ---
+        window.switchTab = (tab) => {
+            document.getElementById('search-area').style.display = tab === 'search' ? 'block' : 'none';
+            document.getElementById('btn-posts').classList.toggle('active', tab === 'posts');
+            document.getElementById('btn-search').classList.toggle('active', tab === 'search');
+            if(tab === 'posts') renderPosts(allPosts);
+        };
+
+        // --- Поиск ---
+        window.handleSearch = () => {
+            const val = document.getElementById('search-query').value.toLowerCase();
+            const filtered = allPosts.filter(p => p.text.toLowerCase().includes(val));
+            renderPosts(filtered);
+        };
+
+        // --- Auth ---
         window.openModal = () => document.getElementById('authModal').style.display = 'flex';
         window.closeModal = () => document.getElementById('authModal').style.display = 'none';
-        window.login = async (type) => {
-            const provider = type === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
-            await signInWithPopup(auth, provider);
+        window.login = async (m) => {
+            const p = m === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
+            await signInWithPopup(auth, p);
             closeModal();
         };
         window.logout = () => signOut(auth);
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            const loginBtn = document.getElementById('login-btn');
-            const userInfo = document.getElementById('user-info');
-            const createArea = document.getElementById('create-post-area');
-
-            if (user) {
-                loginBtn.style.display = 'none';
-                userInfo.style.display = 'block';
-                createArea.style.display = 'flex';
-                document.getElementById('user-name').innerText = user.displayName;
-            } else {
-                loginBtn.style.display = 'flex';
-                userInfo.style.display = 'none';
-                createArea.style.display = 'none';
-            }
-            loadPosts();
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            document.getElementById('login-trigger').style.display = u ? 'none' : 'flex';
+            document.getElementById('user-badge').style.display = u ? 'block' : 'none';
+            document.getElementById('editor').style.display = u ? 'block' : 'none';
+            if(u) document.getElementById('user-name').innerText = u.displayName;
+            initFeed();
         });
 
-        // ПУБЛИКАЦИЯ ПОСТА
-        window.publishPost = async () => {
-            const text = document.getElementById('post-text').value;
-            const img = document.getElementById('post-img-url').value;
-            if(!text.trim()) return alert("Напиши хоть что-нибудь!");
-
-            await addDoc(collection(db, "posts"), {
-                text: text,
-                imageUrl: img,
-                authorId: currentUser.uid,
-                authorName: currentUser.displayName,
-                likes: [],
-                createdAt: serverTimestamp()
-            });
-
-            document.getElementById('post-text').value = "";
-            document.getElementById('post-img-url').value = "";
-        };
-
-        // ЗАГРУЗКА ПОСТОВ
-        function loadPosts() {
+        // --- База данных ---
+        function initFeed() {
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snap) => {
-                const feed = document.getElementById('feed');
-                feed.innerHTML = "";
-                snap.forEach(d => {
-                    const p = d.data();
-                    const id = d.id;
-                    const isLiked = currentUser && p.likes?.includes(currentUser.uid);
-                    const isMyPost = currentUser && p.authorId === currentUser.uid;
-
-                    feed.innerHTML += `
-                        <div class="post">
-                            <div class="post-header">
-                                <span>@${p.authorName}</span>
-                                <span>${p.createdAt ? new Date(p.createdAt.toDate()).toLocaleDateString() : 'только что'}</span>
-                            </div>
-                            <div class="post-text">${p.text}</div>
-                            ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-img">` : ''}
-                            <div class="post-footer">
-                                <button class="like-btn ${isLiked ? 'active' : ''}" onclick="toggleLike('${id}', ${JSON.stringify(p.likes)})">
-                                    ${isLiked ? '❤️' : '🤍'} ${p.likes?.length || 0}
-                                </button>
-                                ${isMyPost ? `<button class="delete-btn" onclick="deletePost('${id}')">Удалить</button>` : ''}
-                            </div>
-                        </div>`;
-                });
+                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderPosts(allPosts);
             });
         }
 
-        window.toggleLike = async (id, likes) => {
-            if(!currentUser) return openModal();
-            const ref = doc(db, "posts", id);
-            await updateDoc(ref, {
-                likes: likes.includes(currentUser.uid) ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+        function renderPosts(data) {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = "";
+            data.forEach(p => {
+                feed.innerHTML += `
+                    <div class="post">
+                        <span class="post-user">@${p.authorName}</span>
+                        <div>${p.text}</div>
+                        ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-img">` : ''}
+                    </div>`;
             });
-        };
+        }
 
-        window.deletePost = async (id) => {
-            if(confirm("Удалить этот пост?")) await deleteDoc(doc(db, "posts", id));
+        window.sendPost = async () => {
+            const txt = document.getElementById('p-text').value;
+            const img = document.getElementById('p-img').value;
+            if(!txt.trim()) return;
+            await addDoc(collection(db, "posts"), {
+                text: txt, imageUrl: img,
+                authorId: user.uid, authorName: user.displayName,
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('p-text').value = "";
+            document.getElementById('p-img').value = "";
         };
     </script>
 </body>
