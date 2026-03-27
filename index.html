@@ -2,107 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXEL Social Network</title>
+    <title>PIXEL PRO - Modal Auth</title>
     <style>
-        /* СТИЛИ ПО ТВОЕМУ МАКЕТУ */
         :root {
             --bg-dark: #333333;
             --panel-gray: #8c8c8c;
             --button-gray: #6e6e6e;
-            --text-main: #000000;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: var(--bg-dark); display: flex; justify-content: center; padding: 20px; color: white; }
+        .container { display: flex; width: 100%; max-width: 1200px; gap: 20px; height: 92vh; }
+
+        /* Sidebar & Main */
+        .sidebar { background: var(--panel-gray); width: 280px; border-radius: 35px; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .main-content { flex-grow: 1; background: var(--panel-gray); border-radius: 35px; padding: 25px; overflow-y: auto; color: black; }
+        .logo-box { background: var(--button-gray); border-radius: 20px; padding: 25px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; }
         
-        body { 
-            background-color: var(--bg-dark); 
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            padding: 20px; 
-        }
+        .nav-btn { background: var(--button-gray); border: none; border-radius: 20px; padding: 15px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .nav-btn:hover { background: #555; color: white; }
 
-        .container { 
-            display: flex; 
-            width: 100%; 
-            max-width: 1200px; 
-            gap: 20px; 
-        }
-
-        /* SIDEBAR */
-        .sidebar { 
-            background-color: var(--panel-gray); 
-            width: 300px; 
-            border-radius: 35px; 
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-        }
-
-        .logo-box { 
-            background-color: var(--button-gray); 
-            border-radius: 25px; 
-            padding: 30px 10px; 
-            text-align: center; 
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            margin-bottom: 10px;
-        }
-
-        .nav-btn {
-            background-color: var(--button-gray);
-            border: none;
-            border-radius: 25px;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none; /* Скрыто по умолчанию */
+            justify-content: center;
             align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--panel-gray);
+            padding: 40px;
+            border-radius: 40px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 24px;
             cursor: pointer;
-            font-weight: 900;
-            font-size: 14px;
+            color: #333;
+        }
+
+        .auth-title { color: black; font-weight: 900; margin-bottom: 25px; font-size: 20px; }
+
+        .auth-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
             transition: 0.2s;
         }
 
-        .nav-btn:hover { background-color: #5a5a5a; color: white; }
-        .nav-btn.active { background-color: #000; color: white; }
+        .btn-google { background: #db4437; }
+        .btn-github { background: #333; }
+        .btn-mail { background: #4285f4; }
+        .auth-btn:hover { transform: scale(1.02); opacity: 0.9; }
 
-        /* MAIN CONTENT */
-        .main-content { 
-            flex-grow: 1; 
-            background-color: var(--panel-gray); 
-            border-radius: 35px; 
-            padding: 25px; 
-            overflow-y: auto; 
-        }
-
-        /* АВТОРИЗАЦИЯ И ПОСТЫ */
-        .auth-card { background: #555; padding: 15px; border-radius: 20px; margin-bottom: 20px; color: white; }
-        .post-card { 
-            background: var(--button-gray); 
-            border-radius: 25px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            color: white; 
-        }
-        .post-img { width: 100%; border-radius: 20px; margin: 15px 0; display: block; }
-        
-        .editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-        textarea, input { 
-            width: 100%; 
-            padding: 15px; 
-            border-radius: 15px; 
-            border: none; 
-            background: #eee; 
-        }
-
-        .actions { display: flex; gap: 15px; align-items: center; }
-        .like-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: white; display: flex; align-items: center; gap: 5px; }
-        .report-btn { margin-left: auto; cursor: pointer; opacity: 0.6; }
-
+        /* Посты */
+        .post { background: var(--button-gray); border-radius: 25px; padding: 20px; margin-bottom: 15px; color: white; }
     </style>
 </head>
 <body>
@@ -110,36 +79,32 @@
     <div class="container">
         <aside class="sidebar">
             <div class="logo-box">PIXEL</div>
-            
-            <div id="user-profile" style="display:none; text-align: center; margin-bottom: 10px;">
-                <b id="user-name">Загрузка...</b>
-                <button onclick="logout()" style="display:block; margin: 5px auto; border:none; background:none; cursor:pointer; text-decoration: underline;">Выйти</button>
-            </div>
-
-            <button class="nav-btn active" id="tab-all" onclick="setTab('all')">ПОСТЫ <span class="icon">🏠</span></button>
-            <button class="nav-btn" id="tab-subs" onclick="setTab('subs')">ПОДПИСКИ <span class="icon">👥</span></button>
-            <button class="nav-btn" onclick="loginPanel()">ВХОД <span class="icon">👤</span></button>
+            <button class="nav-btn" onclick="openModal()">ВХОД <span>👤</span></button>
+            <button class="nav-btn">ПОСТЫ <span>+</span></button>
             <button class="nav-btn">ИНВЕНТ</button>
-            <button class="nav-btn">ПОИСК <span class="icon">🔍</span></button>
         </aside>
 
         <main class="main-content">
-            <div id="post-editor" style="display:none;" class="editor">
-                <textarea id="newPostText" placeholder="Что нового, Pixel?"></textarea>
-                <input type="text" id="newPostImg" placeholder="Ссылка на картинку (необязательно)">
-                <button class="nav-btn" onclick="savePost()" style="background: black; color: white; justify-content: center;">ОПУБЛИКОВАТЬ</button>
-            </div>
-
-            <div id="feed">Загрузка ленты...</div>
+            <div id="feed">Войдите, чтобы видеть посты и лайкать...</div>
         </main>
+    </div>
+
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="auth-title">ВЫБЕРИТЕ СПОСОБ</div>
+            
+            <button class="auth-btn btn-google" onclick="login('google')">GOOGLE</button>
+            <button class="auth-btn btn-github" onclick="login('github')">GITHUB</button>
+            <button class="auth-btn btn-mail" onclick="loginEmail()">ПОЧТА</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, limit, orderBy, doc, updateDoc, arrayUnion, arrayRemove, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // ТВОЙ КОНФИГ
+        // Твой конфиг
         const firebaseConfig = {
             apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
             authDomain: "pixel-7c9f0.firebaseapp.com",
@@ -150,140 +115,31 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let user = null;
-        let userData = { following: [] };
-        let currentTab = 'all';
+        // Функции окна
+        window.openModal = () => document.getElementById('authModal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('authModal').style.display = 'none';
 
-        // --- АВТОРИЗАЦИЯ ---
-        window.loginPanel = () => {
-            const method = prompt("Введите метод входа: google или github").toLowerCase();
-            const provider = method === 'github' ? new GithubAuthProvider() : new GoogleAuthProvider();
-            signInWithPopup(auth, provider).catch(e => alert(e.message));
-        };
-
-        window.logout = () => signOut(auth);
-
-        onAuthStateChanged(auth, async (u) => {
-            user = u;
-            if (u) {
-                document.getElementById('user-profile').style.display = 'block';
-                document.getElementById('post-editor').style.display = 'flex';
-                document.getElementById('user-name').innerText = u.displayName || u.email;
-                
-                const userRef = doc(db, "users", u.uid);
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) {
-                    await setDoc(userRef, { following: [] });
-                } else {
-                    userData = userSnap.data();
-                }
-            } else {
-                document.getElementById('user-profile').style.display = 'none';
-                document.getElementById('post-editor').style.display = 'none';
-            }
-            renderFeed();
-        });
-
-        // --- ЛЕНТА ---
-        window.setTab = (tab) => {
-            currentTab = tab;
-            document.getElementById('tab-all').classList.toggle('active', tab === 'all');
-            document.getElementById('tab-subs').classList.toggle('active', tab === 'subs');
-            renderFeed();
-        };
-
-        let unsubFeed = null;
-        function renderFeed() {
-            if (unsubFeed) unsubFeed();
-            const feedDiv = document.getElementById('feed');
-            let q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(25));
-
-            if (currentTab === 'subs') {
-                if (!user || !userData.following.length) {
-                    feedDiv.innerHTML = "Тут пусто. Подпишитесь на кого-нибудь в общей ленте!";
-                    return;
-                }
-                q = query(collection(db, "posts"), where("authorId", "in", userData.following), limit(25));
-            }
-
-            unsubFeed = onSnapshot(q, (snap) => {
-                feedDiv.innerHTML = "";
-                snap.forEach(docSnap => {
-                    const post = docSnap.data();
-                    const id = docSnap.id;
-                    const isLiked = user && post.likes?.includes(user.uid);
-                    const isFollowing = userData.following.includes(post.authorId);
-
-                    feedDiv.innerHTML += `
-                        <div class="post-card">
-                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px;">
-                                <span><b>${post.authorName || 'Аноним'}</b></span>
-                                ${user && post.authorId !== user.uid ? `
-                                    <button onclick="toggleFollow('${post.authorId}')" style="background:none; border:none; color:white; cursor:pointer; text-decoration:underline;">
-                                        ${isFollowing ? 'Отписаться' : 'Подписаться'}
-                                    </button>
-                                ` : ''}
-                            </div>
-                            <p>${post.text}</p>
-                            ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-img">` : ''}
-                            <div class="actions">
-                                <button class="like-btn" onclick="toggleLike('${id}', ${JSON.stringify(post.likes || [])})">
-                                    ${isLiked ? '❤️' : '🤍'} ${post.likes?.length || 0}
-                                </button>
-                                <span onclick="report('${id}')" class="report-btn">⚠️ Жалоба</span>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
+        // Закрытие при клике мимо окна
+        window.onclick = (event) => {
+            if (event.target == document.getElementById('authModal')) closeModal();
         }
 
-        // --- ДЕЙСТВИЯ ---
-        window.savePost = async () => {
-            const text = document.getElementById('newPostText').value;
-            const img = document.getElementById('newPostImg').value;
-            if (!text.trim()) return;
-            await addDoc(collection(db, "posts"), {
-                text,
-                imageUrl: img,
-                authorId: user.uid,
-                authorName: user.displayName || user.email,
-                likes: [],
-                createdAt: serverTimestamp()
-            });
-            document.getElementById('newPostText').value = "";
-            document.getElementById('newPostImg').value = "";
+        // Логин
+        window.login = async (type) => {
+            const provider = type === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                closeModal();
+            } catch(e) { alert("Ошибка: " + e.message); }
         };
 
-        window.toggleLike = async (id, likes) => {
-            if (!user) return alert("Нужен вход!");
-            const ref = doc(db, "posts", id);
-            await updateDoc(ref, {
-                likes: likes.includes(user.uid) ? arrayRemove(user.uid) : arrayUnion(user.uid)
-            });
-        };
-
-        window.toggleFollow = async (authorId) => {
-            const ref = doc(db, "users", user.uid);
-            const isFollowing = userData.following.includes(authorId);
-            await updateDoc(ref, {
-                following: isFollowing ? arrayRemove(authorId) : arrayUnion(authorId)
-            });
-            userData.following = isFollowing ? userData.following.filter(i => i !== authorId) : [...userData.following, authorId];
-            renderFeed();
-        };
-
-        window.report = async (id) => {
-            const reason = prompt("Причина жалобы:");
-            if (reason) {
-                await addDoc(collection(db, "reports"), { postId: id, reason, reporter: user?.uid || 'anon' });
-                alert("Спасибо, мы проверим этот пост.");
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                document.getElementById('feed').innerHTML = "Привет, " + (user.displayName || user.email) + "! Теперь ты в системе.";
             }
-        };
-
+        });
     </script>
 </body>
 </html>
