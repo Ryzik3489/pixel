@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>PIXEL v3.0 ADMIN PANEL</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { --bg: #0b0b0d; --panel: #1c1c1e; --accent: #007bff; --text: #ffffff; --gray: #8e8e93; --border: #2c2c2e; --danger: #ff453a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+        
+        /* Сайдбар */
+        .sidebar { width: 260px; padding: 25px 15px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+        .nav-btn { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: 12px; cursor: pointer; color: var(--gray); transition: 0.2s; position: relative; }
+        .nav-btn:hover, .nav-btn.active { background: var(--panel); color: var(--text); }
+        .admin-only { display: none; color: #ffd60a !important; border: 1px solid #ffd60a33; margin-top: 10px; }
+
+        /* Контент */
+        .main-content { flex-grow: 1; overflow-y: auto; scrollbar-width: none; }
+        .section { display: none; max-width: 700px; margin: 0 auto; padding: 20px; }
+        .section.active { display: block; }
+
+        /* Админские фишки */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--panel); padding: 20px; border-radius: 20px; border: 1px solid var(--border); text-align: center; }
+        .stat-card h1 { color: var(--accent); font-size: 32px; }
+        
+        .user-row { display: flex; justify-content: space-between; align-items: center; background: var(--panel); padding: 12px 20px; border-radius: 15px; margin-bottom: 8px; }
+        .post { background: var(--panel); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
+        .btn-ban { background: var(--danger); color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
+        .btn-pub { background: #d1d1d6; color: black; border: none; padding: 10px 28px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo" style="font-size:22px; font-weight:900; margin-bottom:30px; padding-left:15px;">PIXEL <span>PRO</span></div>
+        <div class="nav-btn active" onclick="nav('feed', this)"><i class="bi bi-house"></i> Лента</div>
+        <div class="nav-btn" onclick="nav('notif', this)"><i class="bi bi-bell"></i> Уведомления</div>
+        <div class="nav-btn" onclick="nav('profile', this)"><i class="bi bi-person"></i> Профиль</div>
+        
+        <div id="admin-nav" class="nav-btn admin-only" onclick="nav('admin', this)">
+            <i class="bi bi-shield-lock"></i> АДМИН-ПАНЕЛЬ
+        </div>
+
+        <div class="nav-btn" style="margin-top:auto; color:var(--danger);" onclick="logout()"><i class="bi bi-box-arrow-left"></i> Выйти</div>
+    </aside>
+
+    <main class="main-content">
+        <div id="sec-feed" class="section active">
+            <div style="background:var(--panel); padding:20px; border-radius:25px; margin-bottom:20px;">
+                <textarea id="post-text" placeholder="Напишите что-нибудь..." style="width:100%; background:none; border:none; color:white; outline:none; resize:none; font-size:18px;"></textarea>
+                <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+                    <button class="btn-pub" onclick="sendPost()">Пост</button>
+                </div>
+            </div>
+            <div id="feed-items"></div>
+        </div>
+
+        <div id="sec-admin" class="section">
+            <h1 style="margin-bottom:25px;">Управление системой</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Онлайн</h3><h1 id="stat-online">1</h1></div>
+                <div class="stat-card"><h3>Всего постов</h3><h1 id="stat-posts">0</h1></div>
+            </div>
+
+            <h3>Пользователи</h3>
+            <div id="admin-users" style="margin-top:15px;">
+                </div>
+        </div>
+
+        <div id="sec-profile" class="section">
+            <div id="profile-header" style="text-align:center; padding:30px;"></div>
+            <div id="profile-items"></div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU", authDomain: "pixel-7c9f0.firebaseapp.com", projectId: "pixel-7c9f0", storageBucket: "pixel-7c9f0.appspot.com", messagingSenderId: "1016081455742", appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- ВСТАВЬ СВОЙ UID СЮДА ---
+        const ADMIN_UID = "ЗАМЕНИ_МЕНЯ_НА_СВОЙ_ID"; 
+        let user = null, allPosts = [], isBlocked = false;
+
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                user = u;
+                // Проверка на бан
+                const banCheck = await getDocs(query(collection(db, "banned"), where("uid", "==", u.uid)));
+                if(!banCheck.empty) { alert("Вы заблокированы!"); signOut(auth); return; }
+                
+                if(u.uid === ADMIN_UID) document.getElementById('admin-nav').style.display = 'flex';
+                init();
+            } else { signInWithPopup(auth, new GoogleAuthProvider()); }
+        });
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+
+        window.nav = (id, btn) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-'+id).classList.add('active');
+            btn.classList.add('active');
+            if(id === 'admin') loadAdminData();
+        };
+
+        function init() {
+            document.getElementById('profile-header').innerHTML = `<img src="${user.photoURL}" style="width:80px; border-radius:50%; border:2px solid #333;"><h2>${user.displayName}</h2>`;
+            
+            onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), snap => {
+                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                document.getElementById('stat-posts').innerText = allPosts.length;
+                renderPosts(allPosts, 'feed-items');
+            });
+        }
+
+        async function loadAdminData() {
+            const uList = document.getElementById('admin-users');
+            uList.innerHTML = "Загрузка...";
+            // В реальности юзеров лучше брать из коллекции 'users', если ты их туда сохраняешь при входе.
+            // Для примера выведем авторов последних постов
+            const uniqueUsers = [...new Map(allPosts.map(item => [item['uid'], item])).values()];
+            uList.innerHTML = "";
+            uniqueUsers.forEach(u => {
+                uList.innerHTML += `
+                    <div class="user-row">
+                        <span>${u.author} <small style="color:gray;">(${u.uid})</small></span>
+                        <button class="btn-ban" onclick="banUser('${u.uid}')">БАН</button>
+                    </div>`;
+            });
+        }
+
+        window.banUser = async (uid) => {
+            if(confirm("Забанить пользователя? Он больше не сможет зайти.")) {
+                await addDoc(collection(db, "banned"), { uid: uid, reason: "Нарушение правил", date: new Date() });
+                alert("Юзер отправлен в бан!");
+            }
+        };
+
+        function renderPosts(data, target) {
+            const cont = document.getElementById(target);
+            cont.innerHTML = "";
+            data.forEach(p => {
+                const isAdmin = user.uid === ADMIN_UID;
+                const isLiked = p.likes?.includes(user.uid);
+                cont.innerHTML += `
+                    <div class="post">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <b>${p.author}</b>
+                            ${(p.uid === user.uid || isAdmin) ? `<i class="bi bi-trash" style="color:var(--danger); cursor:pointer;" onclick="deletePost('${p.id}')"></i>` : ''}
+                        </div>
+                        <div>${p.text}</div>
+                        <div style="margin-top:15px; display:flex; gap:20px; color:var(--gray);">
+                            <span onclick="like('${p.id}', ${JSON.stringify(p.likes)})"><i class="bi ${isLiked?'bi-heart-fill':'bi-heart'}"></i> ${p.likes?.length || 0}</span>
+                            <span><i class="bi bi-eye"></i> ${p.viewers?.length || 0}</span>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.deletePost = async (id) => { if(confirm("Удалить пост?")) await deleteDoc(doc(db, "posts", id)); };
+
+        window.sendPost = async () => {
+            const val = document.getElementById('post-text').value;
+            if(!val.trim()) return;
+            await addDoc(collection(db, "posts"), { 
+                text: val, author: user.displayName, uid: user.uid, av: user.photoURL, 
+                likes: [], viewers: [user.uid], time: serverTimestamp() 
+            });
+            document.getElementById('post-text').value = "";
+        };
+
+        window.like = async (id, likes) => {
+            const isLiked = likes.includes(user.uid);
+            await updateDoc(doc(db, "posts", id), { likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+        };
+    </script>
+</body>
+</html>
