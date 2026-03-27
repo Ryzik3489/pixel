@@ -2,106 +2,136 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL 1.0 PRO</title>
+    <title>PIXEL v1.1 Beta</title>
     <style>
         :root {
-            --bg: #050505; --panel: #121212; --accent: #00ffa3; --text: #ffffff; --border: #222; --post-bg: #181818;
+            --bg: #0b0b0b;
+            --panel: #1a1a1a;
+            --sub-panel: #252525;
+            --accent: #1d9bf0;
+            --text: #e7e9ea;
+            --text-gray: #71767b;
+            --border: #333639;
         }
+
         body.light-theme {
-            --bg: #f0f2f5; --panel: #ffffff; --accent: #00b371; --text: #1c1e21; --border: #ddd; --post-bg: #f9f9f9;
+            --bg: #ffffff; --panel: #f7f9f9; --sub-panel: #eff3f4; --accent: #1d9bf0; --text: #0f1419; --text-gray: #536471; --border: #eff3f4;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
-        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         
-        .container { display: flex; width: 100%; max-width: 1200px; gap: 15px; padding: 15px; height: 100%; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; justify-content: center; }
 
-        /* Sidebar - Компактный */
-        .sidebar { width: 240px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
-        .logo-box { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 15px; text-align: center; }
-        .logo-box h1 { font-size: 18px; letter-spacing: 4px; color: var(--accent); }
+        .app-container { display: flex; width: 100%; max-width: 1250px; height: 100%; padding: 0 15px; }
 
-        .nav-btn { 
-            background: var(--panel); border: 1px solid var(--border); border-radius: 15px; 
-            padding: 12px 18px; cursor: pointer; font-weight: 600; display: flex; 
-            justify-content: space-between; align-items: center; color: var(--text); font-size: 13px;
+        /* LEFT SIDEBAR */
+        .sidebar { width: 250px; padding: 20px 10px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+        .logo { font-size: 22px; font-weight: 800; padding: 10px 15px; margin-bottom: 20px; letter-spacing: 2px; color: var(--text); }
+        .logo span { font-size: 12px; color: var(--text-gray); font-weight: 400; margin-left: 5px; }
+
+        .nav-item { 
+            display: flex; align-items: center; gap: 15px; padding: 12px 15px; 
+            border-radius: 30px; cursor: pointer; text-decoration: none; color: var(--text);
+            font-size: 18px; transition: 0.2s;
         }
-        .nav-btn:hover, .nav-btn.active { border-color: var(--accent); background: rgba(0, 255, 163, 0.05); }
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        .nav-item.active { font-weight: 700; }
+        .nav-item i { font-size: 22px; width: 30px; text-align: center; }
 
-        /* Main Content */
-        .main-content { 
-            flex-grow: 1; background: var(--panel); border: 1px solid var(--border);
-            border-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; 
+        /* MAIN FEED */
+        .main-feed { 
+            flex-grow: 1; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none;
         }
 
-        /* Посты */
-        .post { background: var(--post-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 10px; }
-        .post-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
-        .hashtag { color: var(--accent); cursor: pointer; }
-        .post-actions { display: flex; gap: 15px; margin-top: 15px; font-size: 13px; }
-        .action-link { cursor: pointer; opacity: 0.7; }
-        .action-link:hover { opacity: 1; color: var(--accent); }
+        /* TOP TABS */
+        .top-tabs { 
+            display: flex; position: sticky; top: 0; background: rgba(11, 11, 11, 0.8); 
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10;
+        }
+        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-gray); font-size: 15px; }
+        .tab.active { color: var(--text); border-bottom: 4px solid var(--accent); }
 
-        /* Окна разделов */
-        .section { display: none; animation: fadeIn 0.2s; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* POST EDITOR */
+        .editor-box { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #333; flex-shrink: 0; }
+        .editor-input-area { flex-grow: 1; }
+        textarea { 
+            width: 100%; background: transparent; border: none; color: var(--text); 
+            font-size: 19px; outline: none; resize: none; margin-top: 10px;
+        }
+        .editor-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .editor-icons { display: flex; gap: 15px; color: var(--accent); cursor: pointer; }
+        .btn-publish { background: var(--accent); color: white; border: none; padding: 10px 22px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 15px; }
 
-        /* Инвентарь */
-        .btn-inv { background: var(--accent) !important; color: #000 !important; justify-content: center !important; margin-top: auto; }
+        /* POST CARD */
+        .post-card { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; transition: 0.2s; }
+        .post-card:hover { background: rgba(255,255,255,0.03); }
+        .post-body { flex-grow: 1; }
+        .post-header { display: flex; gap: 5px; margin-bottom: 4px; font-size: 15px; }
+        .post-header b { color: var(--text); }
+        .post-header span { color: var(--text-gray); }
+        .post-content { font-size: 15px; line-height: 1.4; color: var(--text); }
+        .post-img { width: 100%; border-radius: 15px; margin-top: 12px; border: 1px solid var(--border); }
+        .post-actions { display: flex; justify-content: space-between; max-width: 400px; margin-top: 12px; color: var(--text-gray); font-size: 13px; }
+        .action { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .action:hover { color: var(--accent); }
 
-        /* Темы */
-        .theme-toggle { margin-top: 10px; font-size: 11px; text-align: center; cursor: pointer; opacity: 0.5; }
+        /* NOTIFICATIONS SECTION */
+        .section-hidden { display: none; }
+
+        /* EXIT BUTTON */
+        .btn-exit { margin-top: auto; color: #f4212e !important; }
     </style>
 </head>
-<body class="dark-theme">
+<body>
 
-    <div class="container">
+    <div class="app-container">
         <aside class="sidebar">
-            <div class="logo-box"><h1>PIXEL 1.0</h1></div>
+            <div class="logo">PIXEL <span>v1.1 beta</span></div>
             
-            <button class="nav-btn active" onclick="showSec('posts')">ЛЕНТА <span>🏠</span></button>
-            <button class="nav-btn" onclick="showSec('subs')">ПОДПИСКИ <span>👥</span></button>
-            <button class="nav-btn" onclick="showSec('notif')">УВЕДОМЛЕНИЯ <span id="notif-count">0</span></button>
-            <button class="nav-btn" onclick="showSec('search')">ПОИСК <span>🔍</span></button>
-            <button class="nav-btn" onclick="showSec('settings')">НАСТРОЙКИ <span>⚙️</span></button>
+            <div class="nav-item active" onclick="switchSection('feed')"><i>🏠</i> Лента</div>
+            <div class="nav-item" onclick="switchSection('search')"><i>🔍</i> Поиск</div>
+            <a href="https://world-pixel-ten.vercel.app/" class="nav-item"><i>📦</i> Ивент</a>
+            <div class="nav-item" onclick="switchSection('notif')"><i>🔔</i> Уведомления</div>
+            <div class="nav-item" onclick="openAuth()"><i>👤</i> Профиль</div>
             
-            <a href="https://world-pixel-ten.vercel.app/" class="nav-btn btn-inv">ИНВЕНТАРЬ 📦</a>
-            <div class="theme-toggle" onclick="toggleTheme()">СМЕНИТЬ ТЕМУ 🌓</div>
+            <div class="nav-item btn-exit" onclick="logout()" id="exit-btn" style="display:none;"><i>🚪</i> Выйти</div>
         </aside>
 
-        <main class="main-content">
-            <div id="sec-posts" class="section active">
-                <div id="editor" style="display:none; margin-bottom:20px;">
-                    <textarea id="p-text" placeholder="Что нового? (Используй #хештеги)" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:10px;"></textarea>
-                    <button onclick="sendPost()" style="background:var(--accent); border:none; padding:8px 20px; border-radius:10px; margin-top:5px; cursor:pointer;">Опубликовать</button>
+        <main class="main-feed">
+            <div class="top-tabs">
+                <div class="tab active" id="tab-all" onclick="setFeedType('all')">Для вас</div>
+                <div class="tab" id="tab-subs" onclick="setFeedType('subs')">Подписки</div>
+            </div>
+
+            <div id="sec-feed">
+                <div class="editor-box" id="editor" style="display:none;">
+                    <div class="user-avatar" id="my-avatar"></div>
+                    <div class="editor-input-area">
+                        <textarea id="post-text" placeholder="Что нового?" rows="2"></textarea>
+                        <div class="editor-footer">
+                            <div class="editor-icons">📎 😃 🎨 📊</div>
+                            <button class="btn-publish" onclick="sendPost()">Опубликовать</button>
+                        </div>
+                    </div>
                 </div>
-                <div id="feed">Загрузка...</div>
+                <div id="feed-content">Загрузка...</div>
             </div>
 
-            <div id="sec-search" class="section">
-                <input type="text" oninput="doSearch(this.value)" placeholder="Поиск по хештегам или тексту..." style="width:100%; padding:15px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:15px;">
-                <div id="search-results" style="margin-top:20px;"></div>
+            <div id="sec-search" class="section-hidden" style="padding: 20px;">
+                <input type="text" placeholder="Поиск в PIXEL..." style="width:100%; padding:15px; border-radius:30px; background:var(--sub-panel); border:1px solid var(--border); color:white; outline:none;">
             </div>
 
-            <div id="sec-notif" class="section">
-                <h2>Уведомления</h2>
-                <div id="notif-list" style="margin-top:20px; opacity:0.6;">У вас нет новых уведомлений</div>
-            </div>
-
-            <div id="sec-settings" class="section">
-                <h2>Настройки</h2>
-                <div style="margin-top:20px;">
-                    <button class="nav-btn" onclick="openAuth()">АВТОРИЗАЦИЯ 👤</button>
-                    <p style="margin-top:20px; font-size:12px; opacity:0.5;">PIXEL 1.0 PRO Build 2026</p>
-                </div>
+            <div id="sec-notif" class="section-hidden" style="padding: 20px; text-align: center; color: var(--text-gray);">
+                У вас пока нет уведомлений.
             </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -117,83 +147,76 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         let user = null;
-        let postsData = [];
 
-        // Переключение тем
-        window.toggleTheme = () => document.body.classList.toggle('light-theme');
-
-        // Навигация
-        window.showSec = (id) => {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sec-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // Переключение разделов
+        window.switchSection = (name) => {
+            document.getElementById('sec-feed').style.display = name === 'feed' ? 'block' : 'none';
+            document.getElementById('sec-search').style.display = name === 'search' ? 'block' : 'none';
+            document.getElementById('sec-notif').style.display = name === 'notif' ? 'block' : 'none';
         };
 
-        // Хештеги
-        const formatText = (text) => text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
-
-        // Лайки
-        window.like = async (id, likes) => {
-            if(!user) return alert("Войди!");
-            const ref = doc(db, "posts", id);
-            await updateDoc(ref, { likes: likes.includes(user.uid) ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+        // Логика табов
+        window.setFeedType = (type) => {
+            document.getElementById('tab-all').classList.toggle('active', type === 'all');
+            document.getElementById('tab-subs').classList.toggle('active', type === 'subs');
+            // Тут можно добавить фильтр постов
         };
 
-        // Жалобы на пользователя
-        window.reportUser = async (uid) => {
-            const reason = prompt("Причина жалобы на пользователя:");
-            if(reason) {
-                await addDoc(collection(db, "user_reports"), { target: uid, reason, reporter: user?.uid, date: new Date() });
-                alert("Жалоба на пользователя отправлена");
-            }
-        };
+        // Auth
+        window.openAuth = () => { if(!user) signInWithPopup(auth, new GoogleAuthProvider()); };
+        window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, (u) => {
             user = u;
-            document.getElementById('editor').style.display = u ? 'block' : 'none';
-            initFeed();
+            document.getElementById('editor').style.display = u ? 'flex' : 'none';
+            document.getElementById('exit-btn').style.display = u ? 'flex' : 'none';
+            if(u && u.photoURL) document.getElementById('my-avatar').style.backgroundImage = `url(${u.photoURL})`;
+            loadPosts();
         });
 
-        function initFeed() {
-            onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (snap) => {
-                postsData = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                render(postsData, 'feed');
-            });
-        }
-
-        function render(data, targetId) {
-            const container = document.getElementById(targetId);
-            container.innerHTML = "";
-            data.forEach(p => {
-                container.innerHTML += `
-                    <div class="post">
-                        <div class="post-header">
-                            <b onclick="reportUser('${p.authorId}')" style="cursor:help">@${p.authorName}</b>
-                            <span>${p.createdAt ? 'Active' : '...'}</span>
-                        </div>
-                        <div class="post-content">${formatText(p.text)}</div>
-                        <div class="post-actions">
-                            <span class="action-link" onclick="like('${p.id}', ${JSON.stringify(p.likes || [])})">❤️ ${p.likes?.length || 0}</span>
-                            <span class="action-link">💬 0</span>
-                            <span class="action-link" onclick="alert('Репорт поста отправлен')">⚠️</span>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        window.sendPost = async () => {
-            const text = document.getElementById('p-text').value;
-            if(!text) return;
+        async function sendPost() {
+            const txt = document.getElementById('post-text').value;
+            if(!txt.trim()) return;
             await addDoc(collection(db, "posts"), {
-                text, authorId: user.uid, authorName: user.displayName,
-                likes: [], createdAt: serverTimestamp()
+                text: txt, authorId: user.uid, authorName: user.displayName, 
+                authorImg: user.photoURL, likes: [], createdAt: serverTimestamp()
             });
-            document.getElementById('p-text').value = "";
+            document.getElementById('post-text').value = "";
+        }
+        window.sendPost = sendPost;
+
+        function loadPosts() {
+            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                const container = document.getElementById('feed-content');
+                container.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    container.innerHTML += `
+                        <div class="post-card">
+                            <div class="user-avatar" style="background-image: url(${p.authorImg || ''}); background-size: cover;"></div>
+                            <div class="post-body">
+                                <div class="post-header"><b>${p.authorName}</b> <span>@user</span></div>
+                                <div class="post-content">${p.text}</div>
+                                <div class="post-actions">
+                                    <div class="action">💬 0</div>
+                                    <div class="action">🔁 0</div>
+                                    <div class="action" onclick="like('${d.id}')">❤️ ${p.likes?.length || 0}</div>
+                                    <div class="action" onclick="report()">⚠️</div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        window.like = async (id) => {
+            if(!user) return openAuth();
+            const ref = doc(db, "posts", id);
+            await updateDoc(ref, { likes: arrayUnion(user.uid) });
         };
 
-        window.openAuth = () => signInWithPopup(auth, new GoogleAuthProvider());
-        window.doSearch = (val) => render(postsData.filter(p => p.text.toLowerCase().includes(val.toLowerCase())), 'search-results');
+        window.report = () => alert("Жалоба отправлена модераторам.");
 
     </script>
 </body>
