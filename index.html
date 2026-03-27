@@ -2,143 +2,77 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL v1.1 Beta</title>
+    <title>PIXEL v1.3 FREE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        :root {
-            --bg: #0b0b0b;
-            --panel: #1a1a1a;
-            --sub-panel: #252525;
-            --accent: #1d9bf0;
-            --text: #e7e9ea;
-            --text-gray: #71767b;
-            --border: #333639;
-        }
-
-        body.light-theme {
-            --bg: #ffffff; --panel: #f7f9f9; --sub-panel: #eff3f4; --accent: #1d9bf0; --text: #0f1419; --text-gray: #536471; --border: #eff3f4;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        :root { --bg: #0b0b0b; --panel: #161616; --accent: #00ffcc; --text: #e7e9ea; --border: #2f3336; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
-        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+        .container { display: flex; width: 100%; max-width: 1200px; }
+        .sidebar { width: 260px; padding: 20px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        .logo { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 20px; }
 
-        .app-container { display: flex; width: 100%; max-width: 1250px; height: 100%; padding: 0 15px; }
+        .nav-item { padding: 12px 20px; border-radius: 25px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); }
 
-        /* LEFT SIDEBAR */
-        .sidebar { width: 250px; padding: 20px 10px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-        .logo { font-size: 22px; font-weight: 800; padding: 10px 15px; margin-bottom: 20px; letter-spacing: 2px; color: var(--text); }
-        .logo span { font-size: 12px; color: var(--text-gray); font-weight: 400; margin-left: 5px; }
+        .main { flex-grow: 1; overflow-y: auto; border-right: 1px solid var(--border); scrollbar-width: none; }
+        .editor { padding: 20px; border-bottom: 1px solid var(--border); }
+        input, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; outline: none; }
+        
+        .post { padding: 20px; border-bottom: 1px solid var(--border); }
+        .post-img { width: 100%; border-radius: 15px; margin-top: 10px; }
+        .btn { background: var(--accent); color: black; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
-        .nav-item { 
-            display: flex; align-items: center; gap: 15px; padding: 12px 15px; 
-            border-radius: 30px; cursor: pointer; text-decoration: none; color: var(--text);
-            font-size: 18px; transition: 0.2s;
-        }
-        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
-        .nav-item.active { font-weight: 700; }
-        .nav-item i { font-size: 22px; width: 30px; text-align: center; }
-
-        /* MAIN FEED */
-        .main-feed { 
-            flex-grow: 1; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none;
-        }
-
-        /* TOP TABS */
-        .top-tabs { 
-            display: flex; position: sticky; top: 0; background: rgba(11, 11, 11, 0.8); 
-            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10;
-        }
-        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-gray); font-size: 15px; }
-        .tab.active { color: var(--text); border-bottom: 4px solid var(--accent); }
-
-        /* POST EDITOR */
-        .editor-box { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #333; flex-shrink: 0; }
-        .editor-input-area { flex-grow: 1; }
-        textarea { 
-            width: 100%; background: transparent; border: none; color: var(--text); 
-            font-size: 19px; outline: none; resize: none; margin-top: 10px;
-        }
-        .editor-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); }
-        .editor-icons { display: flex; gap: 15px; color: var(--accent); cursor: pointer; }
-        .btn-publish { background: var(--accent); color: white; border: none; padding: 10px 22px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 15px; }
-
-        /* POST CARD */
-        .post-card { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; transition: 0.2s; }
-        .post-card:hover { background: rgba(255,255,255,0.03); }
-        .post-body { flex-grow: 1; }
-        .post-header { display: flex; gap: 5px; margin-bottom: 4px; font-size: 15px; }
-        .post-header b { color: var(--text); }
-        .post-header span { color: var(--text-gray); }
-        .post-content { font-size: 15px; line-height: 1.4; color: var(--text); }
-        .post-img { width: 100%; border-radius: 15px; margin-top: 12px; border: 1px solid var(--border); }
-        .post-actions { display: flex; justify-content: space-between; max-width: 400px; margin-top: 12px; color: var(--text-gray); font-size: 13px; }
-        .action { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .action:hover { color: var(--accent); }
-
-        /* NOTIFICATIONS SECTION */
-        .section-hidden { display: none; }
-
-        /* EXIT BUTTON */
-        .btn-exit { margin-top: auto; color: #f4212e !important; }
+        /* Модалка профиля */
+        #prof-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .prof-box { background: var(--panel); padding: 30px; border-radius: 25px; width: 350px; text-align: center; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="container">
         <aside class="sidebar">
-            <div class="logo">PIXEL <span>v1.1 beta</span></div>
-            
-            <div class="nav-item active" onclick="switchSection('feed')"><i>🏠</i> Лента</div>
-            <div class="nav-item" onclick="switchSection('search')"><i>🔍</i> Поиск</div>
-            <a href="https://world-pixel-ten.vercel.app/" class="nav-item"><i>📦</i> Ивент</a>
-            <div class="nav-item" onclick="switchSection('notif')"><i>🔔</i> Уведомления</div>
-            <div class="nav-item" onclick="openAuth()"><i>👤</i> Профиль</div>
-            
-            <div class="nav-item btn-exit" onclick="logout()" id="exit-btn" style="display:none;"><i>🚪</i> Выйти</div>
+            <div class="logo">PIXEL 1.3</div>
+            <div class="nav-item" onclick="show('feed')"><i class="bi bi-house"></i> Лента</div>
+            <div class="nav-item" onclick="show('profile')"><i class="bi bi-person"></i> Профиль</div>
+            <a href="https://world-pixel-ten.vercel.app/" style="text-decoration:none; color:inherit;">
+                <div class="nav-item"><i class="bi bi-box-seam"></i> Инвент</div>
+            </a>
+            <button class="btn" id="login-btn" onclick="login()" style="margin-top:auto">Войти</button>
         </aside>
 
-        <main class="main-feed">
-            <div class="top-tabs">
-                <div class="tab active" id="tab-all" onclick="setFeedType('all')">Для вас</div>
-                <div class="tab" id="tab-subs" onclick="setFeedType('subs')">Подписки</div>
+        <main class="main">
+            <div class="editor" id="editor" style="display:none">
+                <textarea id="msg" placeholder="Что нового?"></textarea>
+                <input type="text" id="img-url" placeholder="Ссылка на фото (URL)">
+                <button class="btn" onclick="send()">Опубликовать</button>
             </div>
-
-            <div id="sec-feed">
-                <div class="editor-box" id="editor" style="display:none;">
-                    <div class="user-avatar" id="my-avatar"></div>
-                    <div class="editor-input-area">
-                        <textarea id="post-text" placeholder="Что нового?" rows="2"></textarea>
-                        <div class="editor-footer">
-                            <div class="editor-icons">📎 😃 🎨 📊</div>
-                            <button class="btn-publish" onclick="sendPost()">Опубликовать</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="feed-content">Загрузка...</div>
-            </div>
-
-            <div id="sec-search" class="section-hidden" style="padding: 20px;">
-                <input type="text" placeholder="Поиск в PIXEL..." style="width:100%; padding:15px; border-radius:30px; background:var(--sub-panel); border:1px solid var(--border); color:white; outline:none;">
-            </div>
-
-            <div id="sec-notif" class="section-hidden" style="padding: 20px; text-align: center; color: var(--text-gray);">
-                У вас пока нет уведомлений.
-            </div>
+            <div id="feed"></div>
         </main>
+    </div>
+
+    <div id="prof-modal">
+        <div class="prof-box">
+            <div id="p-avatar" style="width:80px; height:80px; border-radius:50%; background:#444; margin: 0 auto 15px; background-size:cover"></div>
+            <h3 id="p-name">Имя</h3>
+            <p id="p-email" style="font-size:12px; color:gray; margin-bottom:20px"></p>
+            <input type="text" id="new-av" placeholder="URL новой иконки">
+            <button class="btn" onclick="updateAv()">Сменить иконку</button>
+            <button class="btn" style="background:gray; margin-top:10px" onclick="document.getElementById('prof-modal').style.display='none'">Закрыть</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
             authDomain: "pixel-7c9f0.firebaseapp.com",
             projectId: "pixel-7c9f0",
-            storageBucket: "pixel-7c9f0.firebasestorage.app",
+            storageBucket: "pixel-7c9f0.appspot.com",
             messagingSenderId: "1016081455742",
             appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f"
         };
@@ -148,76 +82,58 @@
         const db = getFirestore(app);
         let user = null;
 
-        // Переключение разделов
-        window.switchSection = (name) => {
-            document.getElementById('sec-feed').style.display = name === 'feed' ? 'block' : 'none';
-            document.getElementById('sec-search').style.display = name === 'search' ? 'block' : 'none';
-            document.getElementById('sec-notif').style.display = name === 'notif' ? 'block' : 'none';
-        };
-
-        // Логика табов
-        window.setFeedType = (type) => {
-            document.getElementById('tab-all').classList.toggle('active', type === 'all');
-            document.getElementById('tab-subs').classList.toggle('active', type === 'subs');
-            // Тут можно добавить фильтр постов
-        };
-
-        // Auth
-        window.openAuth = () => { if(!user) signInWithPopup(auth, new GoogleAuthProvider()); };
-        window.logout = () => signOut(auth);
+        window.login = () => signInWithPopup(auth, new GoogleAuthProvider());
+        window.show = (m) => { if(m === 'profile' && user) document.getElementById('prof-modal').style.display='flex'; };
 
         onAuthStateChanged(auth, (u) => {
             user = u;
-            document.getElementById('editor').style.display = u ? 'flex' : 'none';
-            document.getElementById('exit-btn').style.display = u ? 'flex' : 'none';
-            if(u && u.photoURL) document.getElementById('my-avatar').style.backgroundImage = `url(${u.photoURL})`;
-            loadPosts();
+            if(u) {
+                document.getElementById('editor').style.display = 'block';
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('p-name').innerText = u.displayName;
+                document.getElementById('p-email').innerText = u.email;
+                document.getElementById('p-avatar').style.backgroundImage = `url(${u.photoURL})`;
+            }
+            load();
         });
 
-        async function sendPost() {
-            const txt = document.getElementById('post-text').value;
-            if(!txt.trim()) return;
-            await addDoc(collection(db, "posts"), {
-                text: txt, authorId: user.uid, authorName: user.displayName, 
-                authorImg: user.photoURL, likes: [], createdAt: serverTimestamp()
-            });
-            document.getElementById('post-text').value = "";
-        }
-        window.sendPost = sendPost;
+        window.updateAv = async () => {
+            const url = document.getElementById('new-av').value;
+            if(url) {
+                await updateProfile(auth.currentUser, { photoURL: url });
+                location.reload();
+            }
+        };
 
-        function loadPosts() {
-            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                const container = document.getElementById('feed-content');
-                container.innerHTML = "";
+        window.send = async () => {
+            const text = document.getElementById('msg').value;
+            const img = document.getElementById('img-url').value;
+            if(!text) return;
+            await addDoc(collection(db, "posts"), {
+                text, img, author: user.displayName, av: user.photoURL, time: serverTimestamp()
+            });
+            document.getElementById('msg').value = "";
+            document.getElementById('img-url').value = "";
+        };
+
+        function load() {
+            onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), (snap) => {
+                const f = document.getElementById('feed');
+                f.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    container.innerHTML += `
-                        <div class="post-card">
-                            <div class="user-avatar" style="background-image: url(${p.authorImg || ''}); background-size: cover;"></div>
-                            <div class="post-body">
-                                <div class="post-header"><b>${p.authorName}</b> <span>@user</span></div>
-                                <div class="post-content">${p.text}</div>
-                                <div class="post-actions">
-                                    <div class="action">💬 0</div>
-                                    <div class="action">🔁 0</div>
-                                    <div class="action" onclick="like('${d.id}')">❤️ ${p.likes?.length || 0}</div>
-                                    <div class="action" onclick="report()">⚠️</div>
-                                </div>
+                    f.innerHTML += `
+                        <div class="post">
+                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px">
+                                <div style="width:30px; height:30px; border-radius:50%; background:url(${p.av}); background-size:cover"></div>
+                                <b>${p.author}</b>
                             </div>
+                            <div>${p.text}</div>
+                            ${p.img ? `<img src="${p.img}" class="post-img">` : ''}
                         </div>`;
                 });
             });
         }
-
-        window.like = async (id) => {
-            if(!user) return openAuth();
-            const ref = doc(db, "posts", id);
-            await updateDoc(ref, { likes: arrayUnion(user.uid) });
-        };
-
-        window.report = () => alert("Жалоба отправлена модераторам.");
-
     </script>
 </body>
 </html>
