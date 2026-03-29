@@ -2,241 +2,191 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL | The Next Generation</title>
+    <title>PIXEL OS | Ultimate Edition</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        :root {
-            --bg: #000000; --panel: #16181c; --accent: #1d9bf0; 
-            --text: #e7e9ea; --gray: #71767b; --border: #2f3336;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        :root { --bg: #000; --panel: #16181c; --accent: #1d9bf0; --text: #e7e9ea; --gray: #71767b; --border: #2f3336; --danger: #f4212e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
 
-        /* --- ЛЕВОЕ МЕНЮ --- */
-        .sidebar { width: 275px; padding: 10px 20px; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-        .nav-link { 
-            display: flex; align-items: center; gap: 20px; padding: 12px; 
-            border-radius: 30px; cursor: pointer; font-size: 20px; transition: 0.2s; 
-        }
-        .nav-link:hover { background: #181818; }
-        .nav-link.active { font-weight: bold; }
-        .btn-tweet { 
-            background: var(--accent); color: white; border: none; padding: 15px; 
-            border-radius: 30px; font-weight: bold; font-size: 17px; margin-top: 20px; cursor: pointer; 
-        }
+        /* Окно входа */
+        #auth-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
+        .auth-card { background: #000; border: 1px solid var(--border); padding: 40px; border-radius: 20px; text-align: center; width: 350px; }
+        .google-btn { background: #fff; color: #000; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; border: none; width: 100%; margin-top: 20px; }
 
-        /* --- ЦЕНТРАЛЬНАЯ ЛЕНТА --- */
-        .feed { width: 600px; border-right: 1px solid var(--border); overflow-y: auto; scrollbar-width: none; }
-        .feed-header { 
-            position: sticky; top: 0; background: rgba(0,0,0,0.65); 
-            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10;
-        }
-        .feed-tabs { display: flex; height: 53px; }
-        .tab { 
-            flex: 1; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; color: var(--gray); font-weight: bold; position: relative;
-        }
-        .tab.active { color: var(--text); }
-        .tab.active::after { 
-            content: ""; position: absolute; bottom: 0; width: 56px; height: 4px; 
-            background: var(--accent); border-radius: 2px; 
-        }
-
-        /* --- ПОСТЫ --- */
-        .post { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; transition: 0.2s; }
-        .post:hover { background: rgba(255,255,255,0.03); }
-        .avatar { width: 48px; height: 48px; border-radius: 50%; background: #333; flex-shrink: 0; object-fit: cover; }
-        .post-content { flex-grow: 1; }
-        .post-header { display: flex; gap: 5px; margin-bottom: 4px; }
-        .post-user { font-weight: bold; }
-        .post-handle { color: var(--gray); }
-        .verify-badge { color: var(--accent); font-size: 14px; }
-        .post-text { line-height: 20px; font-size: 15px; margin-bottom: 12px; white-space: pre-wrap; }
-        .hashtag { color: var(--accent); cursor: pointer; }
-        .post-actions { display: flex; justify-content: space-between; max-width: 425px; color: var(--gray); }
-        .action { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
-        .action:hover.like { color: #f91880; }
-        .action:hover.retweet { color: #00ba7c; }
-
-        /* --- ПРАВАЯ ПАНЕЛЬ (ТРЕНДЫ) --- */
-        .widgets { width: 350px; padding: 10px 20px; }
-        .search-wrap { 
-            background: #202327; padding: 10px 20px; border-radius: 30px; 
-            display: flex; gap: 15px; color: var(--gray); margin-bottom: 20px;
-        }
-        .widget-card { background: #16181c; border-radius: 16px; padding: 15px; margin-bottom: 20px; }
-        .trend-item { margin: 15px 0; cursor: pointer; }
-        .trend-category { color: var(--gray); font-size: 13px; }
-        .trend-name { font-weight: bold; margin: 2px 0; }
+        /* Sidebar */
+        .sidebar { width: 270px; padding: 10px 20px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .nav-item { display: flex; align-items: center; gap: 20px; padding: 12px; border-radius: 30px; cursor: pointer; font-size: 19px; transition: 0.2s; color: var(--text); }
+        .nav-item:hover { background: #181818; }
+        .nav-item.active { font-weight: 900; }
         
-        /* Стили Профиля */
-        .profile-banner { height: 200px; background: #333; position: relative; }
-        .profile-avatar-large { 
-            width: 135px; height: 135px; border-radius: 50%; border: 4px solid black; 
-            position: absolute; bottom: -65px; left: 15px; background: #222;
-        }
+        /* Лента */
+        .main { width: 600px; border-right: 1px solid var(--border); overflow-y: auto; scrollbar-width: none; }
+        .header { position: sticky; top: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid var(--border); font-size: 20px; font-weight: bold; z-index: 100; }
+        
+        .editor { padding: 15px; border-bottom: 1px solid var(--border); }
+        .editor textarea { width: 100%; background: none; border: none; color: white; font-size: 19px; outline: none; resize: none; min-height: 80px; }
+        .post-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; float: right; }
 
-        .hidden { display: none; }
+        .post { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: #333; flex-shrink: 0; }
+        .post-body { flex-grow: 1; }
+        .post-info { display: flex; gap: 5px; color: var(--gray); font-size: 14px; margin-bottom: 5px; }
+        .post-content { font-size: 15px; line-height: 1.4; margin-bottom: 10px; }
+        .hashtag { color: var(--accent); cursor: pointer; }
+        .actions { display: flex; justify-content: space-between; max-width: 400px; color: var(--gray); font-size: 14px; }
+        .act-btn { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .act-btn:hover { color: var(--accent); }
+        .liked { color: #f91880 !important; }
+
+        .hidden { display: none !important; opacity: 0; }
     </style>
 </head>
 <body>
 
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1>PIXEL</h1>
+            <p style="color:var(--gray); margin-top:10px;">Войдите, чтобы видеть ленту</p>
+            <button class="google-btn" onclick="login()">Войти через Google</button>
+        </div>
+    </div>
+
     <aside class="sidebar">
-        <div class="nav-link" style="font-size: 30px;"><i class="bi bi-cpu"></i></div>
-        <div class="nav-link active" onclick="showPage('feed')"><i class="bi bi-house-door"></i> Лента</div>
-        <div class="nav-link"><i class="bi bi-hash"></i> Исследовать</div>
-        <div class="nav-link" onclick="showPage('notif')"><i class="bi bi-bell"></i> Уведомления</div>
-        <div class="nav-link" onclick="showPage('messages')"><i class="bi bi-envelope"></i> Сообщения</div>
-        <div class="nav-link" onclick="showPage('profile')"><i class="bi bi-person"></i> Профиль</div>
-        <button class="btn-tweet">Опубликовать</button>
+        <div style="font-size: 30px; margin-bottom: 20px; padding-left: 10px;"><i class="bi bi-lightning-charge-fill"></i></div>
+        <div class="nav-item active" onclick="tab('feed', this)"><i class="bi bi-house"></i> Лента</div>
+        <div class="nav-item" onclick="tab('search', this)"><i class="bi bi-search"></i> Поиск</div>
+        <div class="nav-item" onclick="tab('profile', this)"><i class="bi bi-person"></i> Профиль</div>
+        
+        <div class="nav-item" style="margin-top:auto; color:var(--danger);" onclick="logout()">
+            <i class="bi bi-box-arrow-left"></i> Выйти
+        </div>
     </aside>
 
-    <main class="feed">
-        <div id="page-feed">
-            <header class="feed-header">
-                <div style="padding: 15px; font-size: 20px; font-weight: bold;">Главная</div>
-                <div class="feed-tabs">
-                    <div class="tab active" onclick="switchTab('for-you')">Для вас</div>
-                    <div class="tab" onclick="switchTab('following')">Подписки</div>
-                </div>
-            </header>
+    <main class="main">
+        <div class="header" id="header-title">Главная</div>
 
-            <div style="padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 12px;">
-                <div class="avatar" id="my-avatar"></div>
-                <div style="flex-grow: 1;">
-                    <textarea id="tweet-input" placeholder="Что происходит?!" style="width: 100%; background: none; border: none; color: white; font-size: 20px; outline: none; resize: none;"></textarea>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;">
-                        <div style="color: var(--accent); display: flex; gap: 15px; font-size: 18px;">
-                            <i class="bi bi-image"></i><i class="bi bi-filetype-gif"></i><i class="bi bi-list-ul"></i><i class="bi bi-emoji-smile"></i>
-                        </div>
-                        <button class="btn-tweet" onclick="postTweet()" style="margin: 0; padding: 8px 20px;">Пост</button>
-                    </div>
-                </div>
+        <div id="tab-feed" class="section">
+            <div class="editor">
+                <textarea id="post-input" maxlength="280" placeholder="Что происходит?"></textarea>
+                <div style="overflow: hidden;"><button class="post-btn" onclick="sendPost()">Пост</button></div>
             </div>
-
-            <div id="posts-container">
-                </div>
+            <div id="feed-items"></div>
         </div>
 
-        <div id="page-profile" class="hidden">
-            <div class="profile-banner">
-                <div class="profile-avatar-large" id="prof-av"></div>
-            </div>
-            <div style="padding: 70px 15px 20px;">
-                <h2 id="prof-name">Загрузка...</h2>
-                <div style="color: var(--gray);">@user_handle</div>
-                <div style="margin: 15px 0;">💻 Создаю будущее в коде. #Web3 #AI</div>
-                <div style="display: flex; gap: 20px; color: var(--gray); font-size: 14px;">
-                    <span><b>1.2к</b> В подписках</span>
-                    <span><b>854</b> Подписчика</span>
-                </div>
-            </div>
+        <div id="tab-search" class="section hidden" style="padding: 15px;">
+            <input type="text" id="search-input" oninput="searchPosts()" placeholder="Поиск по хэштегам или тексту..." style="width:100%; background:#202327; border:none; padding:12px; border-radius:20px; color:white; outline:none; margin-bottom:20px;">
+            <div id="search-results"></div>
+        </div>
+
+        <div id="tab-profile" class="section hidden">
+            <div id="profile-header" style="padding:20px; border-bottom:1px solid var(--border); text-align:center;"></div>
             <div id="profile-posts"></div>
         </div>
     </main>
 
-    <aside class="widgets">
-        <div class="search-wrap">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Поиск в Pixel" style="background: none; border: none; color: white; outline: none;">
-        </div>
-        <div class="widget-card">
-            <h3 style="margin-bottom: 15px;">Актуальные темы</h3>
-            <div class="trend-item">
-                <div class="trend-category">Технологии · Тренды</div>
-                <div class="trend-name">#JavaScript</div>
-                <div class="trend-category">12.4к постов</div>
-            </div>
-            <div class="trend-item">
-                <div class="trend-category">Новости</div>
-                <div class="trend-name">Firebase v11</div>
-                <div class="trend-category">5,102 поста</div>
-            </div>
-        </div>
-    </aside>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU", authDomain: "pixel-7c9f0.firebaseapp.com", projectId: "pixel-7c9f0", storageBucket: "pixel-7c9f0.appspot.com", messagingSenderId: "1016081455742", appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
+        let user = null, allPosts = [];
 
-        onAuthStateChanged(auth, user => {
-            if(user) {
-                currentUser = user;
-                document.getElementById('my-avatar').style.backgroundImage = `url(${user.photoURL})`;
-                document.getElementById('prof-av').style.backgroundImage = `url(${user.photoURL})`;
-                document.getElementById('prof-name').innerText = user.displayName;
-                initApp();
+        // 1. АВТОРИЗАЦИЯ
+        window.login = () => signInWithPopup(auth, new GoogleAuthProvider());
+        window.logout = () => { if(confirm("Выйти из аккаунта?")) signOut(auth).then(() => location.reload()); };
+
+        onAuthStateChanged(auth, u => {
+            if(u) {
+                user = u;
+                document.getElementById('auth-screen').classList.add('hidden');
+                init();
             } else {
-                signInWithPopup(auth, new GoogleAuthProvider());
+                document.getElementById('auth-screen').classList.remove('hidden');
             }
         });
 
-        function initApp() {
+        // 2. ИНИЦИАЛИЗАЦИЯ ДАННЫХ
+        function init() {
             onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), snap => {
-                const container = document.getElementById('posts-container');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const p = d.data();
-                    const isLiked = p.likes?.includes(currentUser.uid);
-                    // Обработка текста: хэштеги в ссылки
-                    const richText = p.text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
-                    
-                    container.innerHTML += `
-                        <div class="post">
-                            <img src="${p.av}" class="avatar">
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <span class="post-user">${p.author}</span>
-                                    <i class="bi bi-patch-check-fill verify-badge"></i>
-                                    <span class="post-handle">@${p.author.split(' ')[0].toLowerCase()}</span>
-                                </div>
-                                <div class="post-text">${richText}</div>
-                                <div class="post-actions">
-                                    <div class="action"><i class="bi bi-chat"></i> 0</div>
-                                    <div class="action retweet"><i class="bi bi-arrow-left-right"></i> 0</div>
-                                    <div class="action like" onclick="toggleLike('${d.id}', ${JSON.stringify(p.likes || [])})">
-                                        <i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}" style="${isLiked ? 'color: #f91880' : ''}"></i> 
-                                        ${p.likes?.length || 0}
-                                    </div>
-                                    <div class="action"><i class="bi bi-bar-chart"></i> 2.8к</div>
-                                </div>
-                            </div>
-                        </div>`;
-                });
+                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render(allPosts, 'feed-items');
+                render(allPosts.filter(p => p.uid === user.uid), 'profile-posts');
+                updateProfileInfo();
             });
         }
 
-        window.postTweet = async () => {
-            const txt = document.getElementById('tweet-input').value;
+        // 3. ОТРИСОВКА ПОСТОВ
+        function render(data, targetId) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = "";
+            data.forEach(p => {
+                const isLiked = p.likes?.includes(user.uid);
+                const linkedText = p.text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+                container.innerHTML += `
+                    <div class="post">
+                        <img src="${p.av}" class="avatar">
+                        <div class="post-body">
+                            <div class="post-info"><b>${p.author}</b> <span>@user</span></div>
+                            <div class="post-content">${linkedText}</div>
+                            <div class="actions">
+                                <div class="act-btn ${isLiked?'liked':''}" onclick="like('${p.id}', ${JSON.stringify(p.likes)})">
+                                    <i class="bi ${isLiked?'bi-heart-fill':'bi-heart'}"></i> ${p.likes?.length || 0}
+                                </div>
+                                <div class="act-btn"><i class="bi bi-bar-chart"></i> ${p.views || 0}</div>
+                                <div class="act-btn"><i class="bi bi-share"></i></div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // 4. ФУНКЦИИ БАЗЫ ДАННЫХ
+        window.sendPost = async () => {
+            const txt = document.getElementById('post-input').value;
             if(!txt.trim()) return;
             await addDoc(collection(db, "posts"), {
-                text: txt, author: currentUser.displayName, av: currentUser.photoURL,
-                uid: currentUser.uid, likes: [], time: serverTimestamp()
+                text: txt, author: user.displayName, av: user.photoURL, uid: user.uid,
+                likes: [], views: 0, time: serverTimestamp()
             });
-            document.getElementById('tweet-input').value = "";
+            document.getElementById('post-input').value = "";
         };
 
-        window.toggleLike = async (id, likes) => {
+        window.like = async (id, likes) => {
             const ref = doc(db, "posts", id);
-            if(likes.includes(currentUser.uid)) {
-                await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
-            } else {
-                await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
-            }
+            await updateDoc(ref, { 
+                likes: likes.includes(user.uid) ? arrayRemove(user.uid) : arrayUnion(user.uid),
+                views: increment(1) // Добавляем просмотр при взаимодействии
+            });
         };
 
-        window.showPage = (id) => {
-            document.getElementById('page-feed').classList.toggle('hidden', id !== 'feed');
-            document.getElementById('page-profile').classList.toggle('hidden', id !== 'profile');
+        window.searchPosts = () => {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allPosts.filter(p => p.text.toLowerCase().includes(q));
+            render(filtered, 'search-results');
         };
+
+        // 5. НАВИГАЦИЯ
+        window.tab = (id, el) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('tab-'+id).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('header-title').innerText = id === 'feed' ? 'Главная' : (id === 'search' ? 'Поиск' : 'Профиль');
+        };
+
+        function updateProfileInfo() {
+            document.getElementById('profile-header').innerHTML = `
+                <img src="${user.photoURL}" style="width:80px; border-radius:50%; border:3px solid var(--border);">
+                <h2>${user.displayName}</h2>
+                <p style="color:var(--gray)">Вы вошли как администратор сети</p>
+            `;
+        }
     </script>
 </body>
 </html>
