@@ -1,136 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXEL // MONOCHROME SOCIAL</title>
+    <title>PIXEL 2.0 // Социальная Сеть</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
+        :root {
+            --primary: #4f46e5; /* indigo-600 */
+            --primary-hover: #4338ca; /* indigo-700 */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+            background-color: #f9fafb; /* gray-50 */
+            color: #111827; /* gray-900 */
+            -webkit-font-smoothing: antialiased;
         }
 
-        .brutalist-border { border: 2px solid #000000; }
-        .brutalist-shadow { box-shadow: 4px 4px 0px 0px #000000; }
+        /* Красивые закругления и тени (New Modern UI) */
+        .pixel-card {
+            @apply bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden;
+        }
+
+        .pixel-input {
+            @apply w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none transition duration-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100;
+        }
+
+        .pixel-btn-primary {
+            @apply px-5 py-2.5 bg-indigo-600 color-white text-white font-semibold rounded-xl transition duration-200 hover:bg-indigo-700 flex items-center justify-center gap-2 disabled:opacity-50;
+            color: white !important;
+        }
+
+        .pixel-btn-secondary {
+            @apply px-5 py-2.5 bg-gray-100 text-gray-800 font-semibold rounded-xl transition duration-200 hover:bg-gray-200 flex items-center justify-center gap-2;
+        }
+
+        /* Анимация загрузки */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none !important; }
         
-        .btn-pixel {
-            @apply brutalist-border px-4 py-2 font-bold uppercase transition-colors duration-200;
-            background: #ffffff;
-            color: #000000;
-        }
-
-        .btn-pixel:hover {
-            background: #000000;
-            color: #ffffff;
-        }
-
-        .input-pixel {
-            @apply brutalist-border p-2 outline-none w-full;
-            border-radius: 0 !important;
-        }
-
-        .captcha-canvas {
-            background: #eee;
-            border: 2px solid #000;
-            letter-spacing: 5px;
-            font-style: italic;
-        }
-
-        #app { min-height: 100vh; }
-        
-        .hidden { display: none; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #fff; }
-        ::-webkit-scrollbar-thumb { background: #000; }
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: {
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    borderRadius: {
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                        '3xl': '1.5rem',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 
     <div id="app">
-        <section id="auth-screen" class="flex items-center justify-center min-h-screen p-4">
-            <div class="max-w-md w-full p-8 brutalist-border brutalist-shadow">
-                <h1 class="text-6xl font-black mb-8 italic">PIXEL</h1>
+        <section id="auth-screen" class="flex items-center justify-center min-h-screen p-4 bg-gray-50">
+            <div class="w-full max-w-md p-8 pixel-card shadow-lg">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tighter">pixel</h1>
+                    <p class="text-gray-500 mt-2">Добро пожаловать в сеть нового поколения</p>
+                </div>
                 
-                <div id="auth-forms">
-                    <div class="mb-4">
-                        <label class="block font-bold mb-1">EMAIL</label>
-                        <input type="email" id="auth-email" class="input-pixel" placeholder="user@pixel.com">
+                <div id="auth-forms" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="auth-email" class="pixel-input" placeholder="you@example.com">
                     </div>
-                    <div class="mb-6">
-                        <label class="block font-bold mb-1">PASSWORD</label>
-                        <input type="password" id="auth-pass" class="input-pixel" placeholder="••••••••">
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block font-bold mb-1">VERIFY YOU ARE HUMAN</label>
-                        <canvas id="captcha-canvas" width="200" height="50" class="captcha-canvas mb-2 w-full"></canvas>
-                        <input type="text" id="captcha-input" class="input-pixel" placeholder="Enter characters above">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+                        <input type="password" id="auth-pass" class="pixel-input" placeholder="••••••••">
                     </div>
 
-                    <div class="flex flex-col gap-3">
-                        <button onclick="handleAuth('login')" class="btn-pixel w-full py-4 text-xl">LOGIN</button>
-                        <button onclick="handleAuth('signup')" class="btn-pixel w-full">CREATE ACCOUNT</button>
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Проверка на робота</label>
+                        <div class="flex items-center gap-3 mb-2">
+                            <canvas id="captcha-canvas" width="150" height="40" class="rounded border border-gray-200 bg-white"></canvas>
+                            <button onclick="generateCaptcha()" class="text-indigo-600 p-2 rounded-lg hover:bg-indigo-50">
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <input type="text" id="captcha-input" class="pixel-input" placeholder="Введите код с картинки">
+                    </div>
+
+                    <div class="flex flex-col gap-3 pt-3">
+                        <button onclick="handleAuth('login')" id="btn-login" class="pixel-btn-primary w-full py-3">Войти</button>
+                        <button onclick="handleAuth('signup')" class="text-sm text-indigo-600 font-medium hover:text-indigo-700 text-center">Нет аккаунта? Зарегистрироваться</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="main-screen" class="hidden">
-            <header class="sticky top-0 bg-white border-b-4 border-black z-40 p-4">
-                <div class="max-w-4xl mx-auto flex justify-between items-center">
-                    <h1 class="text-3xl font-black italic">PIXEL</h1>
-                    <div class="flex gap-4">
-                        <button onclick="toggleModal('post-modal')" class="btn-pixel flex items-center gap-2">
-                            <i data-lucide="plus-square"></i> <span class="hidden md:inline">NEW POST</span>
+        <section id="main-screen" class="hidden min-h-screen pb-20 md:pb-0">
+            <header class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40 p-4">
+                <div class="max-w-7xl mx-auto flex justify-between items-center">
+                    <h1 class="text-3xl font-extrabold text-indigo-600 tracking-tighter">pixel</h1>
+                    
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleModal('post-modal')" class="pixel-btn-primary px-4 py-2 text-sm">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">Создать пост</span>
                         </button>
-                        <button onclick="handleSignOut()" class="btn-pixel">
-                            <i data-lucide="log-out"></i>
-                        </button>
+                        <div class="relative group">
+                            <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Felix" id="user-avatar-header" class="w-10 h-10 rounded-full border-2 border-indigo-100 cursor-pointer">
+                            <div class="absolute right-0 mt-2 w-48 bg-white pixel-card shadow-lg p-2 hidden group-hover:block z-50">
+                                <p id="user-display-email" class="text-xs text-gray-500 px-3 py-1 break-all"></p>
+                                <div class="h-px bg-gray-100 my-1"></div>
+                                <button onclick="handleSignOut()" class="w-full text-left text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i> Выйти
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8 p-4 mb-20">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 p-4 md:p-6">
                 <aside class="hidden md:block w-1/4 sticky top-24 h-fit">
-                    <div class="brutalist-border p-4 mb-4">
-                        <p class="font-bold uppercase mb-2">My Profile</p>
-                        <p id="user-display-email" class="text-sm break-all mb-4"></p>
-                        <div class="flex justify-between border-t border-black pt-2">
-                            <span>FOLLOWERS</span>
-                            <span id="follower-count" class="font-bold">0</span>
+                    <div class="pixel-card p-6 text-center">
+                        <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Felix" id="user-avatar-aside" class="w-24 h-24 rounded-full border-4 border-indigo-50 mx-auto mb-4">
+                        <p id="user-display-email-aside" class="font-semibold text-gray-900 break-all mb-1"></p>
+                        <p class="text-sm text-gray-500 mb-4">Участник Pixel</p>
+                        <div class="flex justify-center gap-6 border-t border-gray-100 pt-4">
+                            <div>
+                                <p class="text-2xl font-bold" id="follower-count">0</p>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider">Подписчиков</p>
+                            </div>
                         </div>
                     </div>
                 </aside>
 
-                <main class="w-full md:w-3/4 space-y-8" id="feed-container">
-                    </main>
+                <main class="w-full md:w-1/2 space-y-6" id="feed-container">
+                    <div id="feed-loader" class="text-center pt-10">
+                        <div class="loader mx-auto mb-2"></div>
+                        <p class="text-sm text-gray-500">Загрузка ленты...</p>
+                    </div>
+                </main>
+
+                <aside class="hidden lg:block w-1/4 sticky top-24 h-fit space-y-6">
+                    <div class="pixel-card p-5">
+                        <h3 class="font-bold text-lg mb-3">Тренды #pixel</h3>
+                        <div class="space-y-2 text-sm text-indigo-600">
+                            <a href="#" class="block hover:underline">#web3</a>
+                            <a href="#" class="block hover:underline">#tailwindcss</a>
+                            <a href="#" class="block hover:underline">#firebase_v10</a>
+                            <a href="#" class="block hover:underline">#no_brutalism</a>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
-            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-black p-4 flex justify-around z-40">
-                <button onclick="window.scrollTo(0,0)"><i data-lucide="home"></i></button>
-                <button onclick="toggleModal('post-modal')"><i data-lucide="plus-square"></i></button>
-                <button onclick="handleSignOut()"><i data-lucide="user"></i></button>
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 p-3 flex justify-around items-center z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] rounded-t-2xl">
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="p-2 text-gray-500 hover:text-indigo-600">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                </button>
+                <button onclick="toggleModal('post-modal')" class="p-3 bg-indigo-600 text-white rounded-full shadow-md shadow-indigo-200">
+                    <i data-lucide="plus" class="w-6 h-6"></i>
+                </button>
+                <button onclick="handleSignOut()" class="p-2 text-gray-500 hover:text-red-600">
+                    <i data-lucide="log-out" class="w-6 h-6"></i>
+                </button>
             </nav>
         </section>
 
-        <div id="post-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white brutalist-border p-6 w-full max-w-lg">
-                <div class="flex justify-between mb-6">
-                    <h2 class="text-2xl font-black">NEW PIXEL</h2>
-                    <button onclick="toggleModal('post-modal')"><i data-lucide="x"></i></button>
+        <div id="post-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0" style="backdrop-filter: blur(4px);">
+            <div class="bg-white pixel-card p-6 w-full max-w-lg shadow-xl transform scale-95 transition-transform duration-300">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold tracking-tight">Новая публикация</h2>
+                    <button onclick="toggleModal('post-modal')" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
                 <div class="space-y-4">
-                    <input type="text" id="post-img-url" class="input-pixel" placeholder="IMAGE URL">
-                    <textarea id="post-text" class="input-pixel h-32" placeholder="WHAT'S ON YOUR MIND?"></textarea>
-                    <input type="text" id="post-tags" class="input-pixel" placeholder="TAGS (comma separated)">
-                    <button onclick="createNewPost()" class="btn-pixel w-full py-4 text-xl">PUBLISH</button>
+                    <input type="text" id="post-img-url" class="pixel-input" placeholder="Ссылка на изображение (URL)">
+                    <textarea id="post-text" class="pixel-input h-36 resize-none" placeholder="О чем вы думаете?"></textarea>
+                    <input type="text" id="post-tags" class="pixel-input" placeholder="Теги (через запятую, без #)">
+                    <button onclick="createNewPost()" id="btn-publish" class="pixel-btn-primary w-full py-3 text-lg">
+                        Опубликовать
+                    </button>
                 </div>
             </div>
         </div>
@@ -139,8 +216,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, increment, arrayUnion, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, increment, arrayUnion, setDoc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // ТВОЙ КОНФИГ (Оставляем неизменным)
         const firebaseConfig = {
             apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
             authDomain: "pixel-7c9f0.firebaseapp.com",
@@ -151,29 +229,44 @@
             measurementId: "G-E35TB02ENB"
         };
 
+        // Инициализация
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- STATE MANAGEMENT ---
+        // Глобальное состояние
         let currentUser = null;
         let captchaText = "";
+        let trackedViews = new Set(); // Локальный трекинг просмотров для сессии
 
-        // --- CAPTCHA LOGIC ---
-        function generateCaptcha() {
+        // --- MODERN CAPTCHA LOGIC ---
+        window.generateCaptcha = () => {
             const canvas = document.getElementById('captcha-canvas');
             const ctx = canvas.getContext('2d');
-            captchaText = Math.random().toString(36).substring(2, 8).toUpperCase();
+            // Генерируем случайную строку (цифры + буквы)
+            captchaText = Math.random().toString(36).substring(2, 7).toUpperCase();
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#000";
-            ctx.font = "bold 24px monospace";
-            ctx.fillText(captchaText, 40, 35);
-            // Add noise lines
-            for(let i=0; i<5; i++) {
-                ctx.moveTo(Math.random()*200, Math.random()*50);
-                ctx.lineTo(Math.random()*200, Math.random()*50);
+            
+            // Фон с шумом
+            ctx.fillStyle = "#f3f4f6"; // gray-100
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Линии шума
+            for(let i=0; i<4; i++) {
+                ctx.strokeStyle = `rgba(79, 70, 229, ${Math.random() * 0.3})`; // indigo with alpha
+                ctx.beginPath();
+                ctx.moveTo(Math.random()*150, Math.random()*40);
+                ctx.lineTo(Math.random()*150, Math.random()*40);
                 ctx.stroke();
             }
+
+            // Текст
+            ctx.fillStyle = "#4f46e5"; // indigo-600
+            ctx.font = "bold 22px 'Courier New', monospace";
+            ctx.setTransform(1, Math.random() * 0.1, Math.random() * 0.1, 1, 0, 0); // Небольшая деформация
+            ctx.fillText(captchaText, 30, 28);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Сброс
         }
 
         // --- AUTH LOGIC ---
@@ -181,12 +274,17 @@
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
             const captchaInput = document.getElementById('captcha-input').value;
+            const btn = document.getElementById('btn-login');
 
-            if (captchaInput !== captchaText) {
-                alert("Incorrect Captcha!");
+            if (!email || !pass) return alert("Заполните поля");
+            if (captchaInput.toUpperCase() !== captchaText) {
+                alert("Неверный код капчи!");
                 generateCaptcha();
                 return;
             }
+
+            btn.disabled = true;
+            btn.innerHTML = `<div class="loader"></div>`;
 
             try {
                 if (type === 'signup') {
@@ -195,146 +293,312 @@
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
             } catch (err) {
-                alert(err.message);
+                alert("Ошибка аутентификации: " + err.message);
+                generateCaptcha();
+            } finally {
+                btn.disabled = false;
+                btn.innerText = (type === 'signup') ? "Создать аккаунт" : "Войти";
             }
         };
 
         window.handleSignOut = () => signOut(auth);
 
+        // Отслеживание состояния пользователя
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-screen').classList.remove('hidden');
-                document.getElementById('user-display-email').innerText = user.email;
+                
+                // Обновляем UI данными пользователя
+                const email = user.email;
+                const seed = email.split('@')[0];
+                const avatarUrl = `https://api.dicebear.com/8.x/notionists/svg?seed=${seed}`;
+                
+                document.getElementById('user-display-email').innerText = email;
+                document.getElementById('user-display-email-aside').innerText = email;
+                document.getElementById('user-avatar-header').src = avatarUrl;
+                document.getElementById('user-avatar-aside').src = avatarUrl;
+                
                 initFeed();
+                lucide.createIcons();
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('main-screen').classList.add('hidden');
                 generateCaptcha();
+                // Сброс локального трекинга при логауте
+                trackedViews.clear();
             }
         });
 
         // --- FIRESTORE LOGIC ---
+
+        // Уникальный просмотр: 1 пользователь = 1 просмотр
+        async function trackUniqueView(postId) {
+            if (!currentUser || trackedViews.has(postId)) return;
+
+            const postRef = doc(db, "posts", postId);
+            
+            try {
+                // Используем транзакцию для атомарности
+                await runTransaction(db, async (transaction) => {
+                    const postDoc = await transaction.get(postRef);
+                    if (!postDoc.exists()) return;
+
+                    const viewedBy = postDoc.data().viewedBy || [];
+
+                    // Если пользователя нет в массиве viewedBy в БД
+                    if (!viewedBy.includes(currentUser.uid)) {
+                        transaction.update(postRef, {
+                            views: increment(1),
+                            viewedBy: arrayUnion(currentUser.uid)
+                        });
+                    }
+                });
+                // Добавляем в локальный Set, чтобы не стучаться в БД в этой сессии
+                trackedViews.add(postId);
+            } catch (e) {
+                console.error("Ошибка трекинга просмотра:", e);
+            }
+        }
+
         window.createNewPost = async () => {
             const img = document.getElementById('post-img-url').value;
             const text = document.getElementById('post-text').value;
-            const tags = document.getElementById('post-tags').value.split(',').map(t => t.trim());
+            const tagsInput = document.getElementById('post-tags').value;
+            const btn = document.getElementById('btn-publish');
 
-            if (!img || !text) return alert("Fill required fields");
+            if (!img || !text) return alert("URL картинки и текст обязательны");
 
-            await addDoc(collection(db, "posts"), {
-                author: currentUser.email,
-                uid: currentUser.uid,
-                image: img,
-                content: text,
-                tags: tags,
-                likes: 0,
-                dislikes: 0,
-                views: 0,
-                comments: [],
-                timestamp: Date.now()
-            });
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim().toLowerCase()).filter(t => t) : [];
+            
+            btn.disabled = true;
+            btn.innerHTML = `<div class="loader"></div> Опубликовываем...`;
 
-            toggleModal('post-modal');
-            document.getElementById('post-img-url').value = "";
-            document.getElementById('post-text').value = "";
+            try {
+                await addDoc(collection(db, "posts"), {
+                    author: currentUser.email,
+                    authorUid: currentUser.uid,
+                    image: img,
+                    content: text,
+                    tags: tags,
+                    likes: 0,
+                    dislikes: 0,
+                    views: 0,
+                    viewedBy: [], // Массив для хранения UID просмотревших
+                    comments: [],
+                    timestamp: Date.now()
+                });
+
+                toggleModal('post-modal');
+                // Очистка полей
+                document.getElementById('post-img-url').value = "";
+                document.getElementById('post-text').value = "";
+                document.getElementById('post-tags').value = "";
+            } catch (err) {
+                alert("Ошибка при создании поста: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Опубликовать";
+            }
         };
 
         function initFeed() {
             const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+            const loader = document.getElementById('feed-loader');
+            
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('feed-container');
-                container.innerHTML = "";
-                snapshot.forEach((docSnap) => {
-                    renderPost(docSnap.id, docSnap.data());
-                    // Increment view
-                    updateDoc(doc(db, "posts", docSnap.id), { views: increment(1) });
+                // Удаляем лоадер при первом получении данных
+                if(loader) loader.remove(); 
+                
+                // Сохраняем IDs открытых секций комментариев
+                const openComments = [];
+                document.querySelectorAll('[id^="cmt-sec-"]').forEach(el => {
+                    if(!el.classList.contains('hidden')) openComments.push(el.id.replace('cmt-sec-', ''));
                 });
+
+                container.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="pixel-card p-10 text-center text-gray-500">
+                            <i data-lucide="image" class="w-12 h-12 mx-auto mb-4 opacity-30"></i>
+                            Здесь пока пусто. Будьте первым, кто опубликует Pixel!
+                        </div>
+                    `;
+                } else {
+                    snapshot.forEach((docSnap) => {
+                        const postId = docSnap.id;
+                        const postData = docSnap.data();
+                        renderPost(postId, postData, openComments.includes(postId));
+                        
+                        // Запускаем асинхронный трекинг уникального просмотра
+                        trackUniqueView(postId);
+                    });
+                }
                 lucide.createIcons();
             });
         }
 
         window.handleEngagement = async (id, type) => {
             const ref = doc(db, "posts", id);
+            // Атомарный инкремент
             await updateDoc(ref, { [type]: increment(1) });
         };
 
         window.addComment = async (id) => {
             const input = document.getElementById(`cmt-in-${id}`);
-            if (!input.value) return;
+            if (!input.value.trim()) return;
+            
             const ref = doc(db, "posts", id);
-            await updateDoc(ref, {
-                comments: arrayUnion({
-                    user: currentUser.email,
-                    text: input.value,
-                    time: Date.now()
-                })
-            });
-            input.value = "";
+            try {
+                await updateDoc(ref, {
+                    comments: arrayUnion({
+                        user: currentUser.email,
+                        text: input.value.trim(),
+                        timestamp: Date.now()
+                    })
+                });
+                input.value = "";
+            } catch (err) {
+                console.error("Ошибка комментария:", err);
+            }
         };
 
-        window.followUser = async (targetUid) => {
-            if (targetUid === currentUser.uid) return alert("Can't follow yourself");
-            const followRef = doc(db, "follows", `${currentUser.uid}_${targetUid}`);
-            await setDoc(followRef, { follower: currentUser.uid, following: targetUid });
-            alert("Following!");
+        window.followUser = async (targetUid, targetEmail) => {
+            if (!currentUser) return alert("Войдите, чтобы подписываться");
+            if (targetUid === currentUser.uid) return alert("Нельзя подписаться на себя");
+            
+            try {
+                const followRef = doc(db, "follows", `${currentUser.uid}_${targetUid}`);
+                await setDoc(followRef, { 
+                    follower: currentUser.uid, 
+                    following: targetUid,
+                    timestamp: Date.now()
+                });
+                alert(`Вы подписались на ${targetEmail}`);
+            } catch (err) {
+                console.error("Ошибка подписки:", err);
+            }
         };
 
         // --- UI HELPERS ---
         window.toggleModal = (id) => {
-            document.getElementById(id).classList.toggle('hidden');
+            const modal = document.getElementById(id);
+            const body = modal.querySelector('.pixel-card');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    body.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                body.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
         };
 
         window.toggleComments = (id) => {
-            document.getElementById(`cmt-sec-${id}`).classList.toggle('hidden');
+            const sec = document.getElementById(`cmt-sec-${id}`);
+            const icon = document.getElementById(`cmt-icon-${id}`);
+            sec.classList.toggle('hidden');
+            icon.classList.toggle('text-indigo-600');
         };
 
-        function renderPost(id, data) {
+        // Форматирование времени (например, "5 мин. назад")
+        function formatRelativeTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `${days} дн. назад`;
+            if (hours > 0) return `${hours} ч. назад`;
+            if (minutes > 0) return `${minutes} мин. назад`;
+            return `только что`;
+        }
+
+        function renderPost(id, data, isCommentsOpen) {
             const container = document.getElementById('feed-container');
-            const date = new Date(data.timestamp).toLocaleDateString();
+            const timeAgo = formatRelativeTime(data.timestamp);
             
+            // Генерируем аватар автора на основе email
+            const authorSeed = data.author.split('@')[0];
+            const authorAvatar = `https://api.dicebear.com/8.x/notionists/svg?seed=${authorSeed}`;
+
             const postHtml = `
-                <article class="brutalist-border overflow-hidden">
-                    <div class="p-4 border-b-2 border-black flex justify-between items-center">
-                        <span class="font-bold uppercase text-sm">${data.author}</span>
-                        <button onclick="followUser('${data.uid}')" class="text-xs btn-pixel py-1">FOLLOW</button>
-                    </div>
-                    <img src="${data.image}" alt="post" class="w-full grayscale hover:grayscale-0 transition-all duration-500 border-b-2 border-black object-cover max-h-96">
-                    <div class="p-4">
-                        <div class="flex gap-2 mb-2">
-                            ${data.tags.map(t => `<span class="text-xs font-black">#${t.toUpperCase()}</span>`).join(' ')}
+                <article class="pixel-card">
+                    <div class="p-4 flex justify-between items-center border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <img src="${authorAvatar}" class="w-9 h-9 rounded-full border border-gray-100">
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">${data.author}</p>
+                                <p class="text-xs text-gray-400">${timeAgo}</p>
+                            </div>
                         </div>
-                        <p class="mb-4">${data.content}</p>
-                        <div class="flex justify-between items-center text-xs font-bold mb-4">
-                            <span>${date}</span>
-                            <span>${data.views} VIEWS</span>
+                        <button onclick="followUser('${data.authorUid}', '${data.author}')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg">
+                            Подписаться
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-100 aspect-[4/3] flex items-center justify-center overflow-hidden">
+                        <img src="${data.image}" alt="Pixel Content" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" onerror="this.src='https://placehold.co/600x450?text=Image+Error'">
+                    </div>
+                    
+                    <div class="p-4 p-5">
+                        ${data.tags && data.tags.length > 0 ? `
+                            <div class="flex gap-2 mb-3">
+                                ${data.tags.map(t => `<span class="text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">#${t}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <p class="text-gray-800 text-[15px] leading-relaxed mb-4">${data.content}</p>
+                        
+                        <div class="flex justify-between items-center text-sm text-gray-400 border-t border-gray-50 pt-4 mb-3">
+                            <span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> ${data.views} уникальных просмотров</span>
                         </div>
                         
-                        <div class="flex border-t-2 border-black pt-4 gap-4">
-                            <button onclick="handleEngagement('${id}', 'likes')" class="flex items-center gap-1 hover:underline">
-                                <i data-lucide="thumbs-up" class="w-4"></i> ${data.likes}
+                        <div class="flex gap-2 border-t border-gray-50 pt-3">
+                            <button onclick="handleEngagement('${id}', 'likes')" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-green-600 transition">
+                                <i data-lucide="arrow-big-up" class="w-5 h-5"></i>
+                                <span class="font-medium text-sm">${data.likes}</span>
                             </button>
-                            <button onclick="handleEngagement('${id}', 'dislikes')" class="flex items-center gap-1 hover:underline">
-                                <i data-lucide="thumbs-down" class="w-4"></i> ${data.dislikes}
+                            <button onclick="handleEngagement('${id}', 'dislikes')" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-red-600 transition">
+                                <i data-lucide="arrow-big-down" class="w-5 h-5"></i>
+                                <span class="font-medium text-sm">${data.dislikes}</span>
                             </button>
-                            <button onclick="toggleComments('${id}')" class="flex items-center gap-1 hover:underline">
-                                <i data-lucide="message-square" class="w-4"></i> ${data.comments.length}
+                            <button onclick="toggleComments('${id}')" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition ${isCommentsOpen ? 'bg-gray-50 text-indigo-600' : ''}">
+                                <i data-lucide="message-square" id="cmt-icon-${id}" class="w-5 h-5 ${isCommentsOpen ? 'text-indigo-600' : ''}"></i>
+                                <span class="font-medium text-sm">${data.comments ? data.comments.length : 0}</span>
                             </button>
                         </div>
                     </div>
 
-                    <div id="cmt-sec-${id}" class="hidden bg-gray-50 border-t-2 border-black p-4">
-                        <div class="space-y-3 mb-4 max-h-40 overflow-y-auto">
-                            ${data.comments.map(c => `
-                                <div class="text-sm">
-                                    <span class="font-bold">${c.user.split('@')[0]}:</span> ${c.text}
-                                </div>
-                            `).join('')}
+                    <div id="cmt-sec-${id}" class="${isCommentsOpen ? '' : 'hidden'} bg-gray-50 border-t border-gray-100 p-4 rounded-b-2xl">
+                        <div class="space-y-3 mb-4 max-h-52 overflow-y-auto pr-2">
+                            ${data.comments && data.comments.length > 0 ? data.comments.map(c => {
+                                const cmtAuthorSeed = c.user.split('@')[0];
+                                const cmtAvatar = `https://api.dicebear.com/8.x/notionists/svg?seed=${cmtAuthorSeed}`;
+                                return `
+                                    <div class="flex items-start gap-3 text-sm">
+                                        <img src="${cmtAvatar}" class="w-7 h-7 rounded-full mt-0.5 border border-gray-100">
+                                        <div class="bg-white p-3 rounded-xl border border-gray-100 flex-1">
+                                            <p class="font-semibold text-gray-900">${c.user.split('@')[0]}</p>
+                                            <p class="text-gray-700 mt-0.5">${c.text}</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('') : '<p class="text-center text-sm text-gray-400 py-2">Пока нет комментариев</p>'}
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="cmt-in-${id}" class="input-pixel text-sm" placeholder="Add comment...">
-                            <button onclick="addComment('${id}')" class="btn-pixel text-xs">SEND</button>
+                        <div class="flex gap-2 mt-2">
+                            <input type="text" id="cmt-in-${id}" class="pixel-input text-sm px-3 py-2" placeholder="Напишите комментарий...">
+                            <button onclick="addComment('${id}')" class="pixel-btn-primary px-4 py-2 text-sm">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
                 </article>
@@ -342,8 +606,8 @@
             container.innerHTML += postHtml;
         }
 
-        // Init
-        generateCaptcha();
+        // Запуск капчи при загрузке
+        window.onload = generateCaptcha;
     </script>
 </body>
 </html>
