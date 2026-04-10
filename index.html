@@ -2,223 +2,26 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Messenger</title>
-    <!-- Подключаем React, Tailwind и Иконки -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        /* Эффект Жидкого Стекла */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .message-bubble {
-            transition: transform 0.2s ease;
-        }
-        .message-bubble:hover { transform: scale(1.01); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-    </style>
 </head>
-<body>
+<body class="bg-slate-900">
     <div id="root"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Твой Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
-            authDomain: "pixel-7c9f0.firebaseapp.com",
-            projectId: "pixel-7c9f0",
-            storageBucket: "pixel-7c9f0.firebasestorage.app",
-            messagingSenderId: "1016081455742",
-            appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const { useState, useEffect, useRef } = React;
-
-        const PixelApp = () => {
-            const [user, setUser] = useState(null);
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [messages, setMessages] = useState([]);
-            const [input, setInput] = useState('');
-            const [loading, setLoading] = useState(false);
-            const scrollRef = useRef();
-
-            // Следим за состоянием входа
-            useEffect(() => {
-                const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-                return unsub;
-            }, []);
-
-            // Слушаем сообщения из Firestore
-            useEffect(() => {
-                if (user) {
-                    const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-                    const unsubscribe = onSnapshot(q, (snapshot) => {
-                        setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                        setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-                    });
-                    return unsubscribe;
-                }
-            }, [user]);
-
-            const handleAuth = async (mode) => {
-                setLoading(true);
-                try {
-                    if (mode === 'login') await signInWithEmailAndPassword(auth, email, password);
-                    else await createUserWithEmailAndPassword(auth, email, password);
-                } catch (e) { alert("Ошибка: " + e.message); }
-                setLoading(false);
-            };
-
-            const sendMessage = async (e) => {
-                e.preventDefault();
-                if (!input.trim()) return;
-                const text = input;
-                setInput('');
-                await addDoc(collection(db, "messages"), {
-                    text: text,
-                    uid: user.uid,
-                    email: user.email,
-                    createdAt: serverTimestamp()
-                });
-            };
-
-            // Экран авторизации
-            if (!user) return (
-                <div className="flex h-screen items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-                    <div className="glass-panel p-10 rounded-[40px] w-full max-w-md text-center">
-                        <div className="w-20 h-20 bg-blue-500 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl shadow-blue-500/40 mb-6">
-                            <i className="fa-solid fa-p"></i>
-                        </div>
-                        <h1 className="text-3xl font-bold mb-2">Pixel</h1>
-                        <p className="text-blue-300/60 mb-8">Будущее общения здесь</p>
-                        
-                        <div className="space-y-4">
-                            <input type="email" placeholder="Email" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500 transition" onChange={e => setEmail(e.target.value)} />
-                            <input type="password" placeholder="Пароль" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500 transition" onChange={e => setPassword(e.target.value)} />
-                            <button onClick={() => handleAuth('login')} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-xl shadow-blue-600/20">
-                                {loading ? 'Загрузка...' : 'Войти'}
-                            </button>
-                            <button onClick={() => handleAuth('reg')} className="w-full bg-transparent border border-white/20 py-4 rounded-2xl font-semibold hover:bg-white/5 transition">
-                                Регистрация
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            // Основной интерфейс
+    <script type="text/babel">
+        const App = () => {
             return (
-                <div className="flex h-screen p-4 gap-4 max-w-[1600px] mx-auto overflow-hidden">
-                    <!-- Боковое меню -->
-                    <aside className="hidden lg:flex flex-col w-72 glass-panel rounded-[32px] p-6">
-                        <div className="flex items-center gap-4 mb-10 px-2">
-                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg">P</div>
-                            <span className="text-2xl font-bold tracking-tight">Pixel</span>
-                        </div>
-                        
-                        <nav className="space-y-2 flex-1">
-                            <NavItem icon="fa-comment-dots" label="Все чаты" active />
-                            <NavItem icon="fa-user-group" label="Группы" />
-                            <NavItem icon="fa-bullhorn" label="Каналы" />
-                            <NavItem icon="fa-star" label="Избранное" />
-                        </nav>
-
-                        <div className="pt-6 border-t border-white/10">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-full"></div>
-                                <div className="overflow-hidden">
-                                    <p className="text-sm font-bold truncate">{user.email}</p>
-                                    <p className="text-[10px] text-blue-400">Online</p>
-                                </div>
-                            </div>
-                            <button onClick={() => signOut(auth)} className="w-full text-left p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition">
-                                <i className="fa-solid fa-right-from-bracket mr-3"></i>Выйти
-                            </button>
-                        </div>
-                    </aside>
-
-                    <!-- Окно чата -->
-                    <main className="flex-1 flex flex-col glass-panel rounded-[32px] relative overflow-hidden">
-                        <header className="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-blue-400">
-                                    <i className="fa-solid fa-hashtag text-xl"></i>
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold">Общий поток</h2>
-                                    <p className="text-xs text-gray-400">{messages.length} сообщений</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-5 text-gray-400">
-                                <i className="fa-solid fa-search cursor-pointer hover:text-white transition"></i>
-                                <i className="fa-solid fa-ellipsis-vertical cursor-pointer hover:text-white transition"></i>
-                            </div>
-                        </header>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-                            {messages.map((m) => (
-                                <div key={m.id} className={`flex ${m.uid === user.uid ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`message-bubble max-w-[75%] p-4 rounded-3xl shadow-lg ${
-                                        m.uid === user.uid 
-                                        ? 'bg-blue-600 rounded-tr-none text-white shadow-blue-900/20' 
-                                        : 'bg-white/10 backdrop-blur-md rounded-tl-none border border-white/5'
-                                    }`}>
-                                        <p className="text-[10px] font-bold opacity-50 mb-1 uppercase tracking-wider">
-                                            {m.email?.split('@')[0]}
-                                        </p>
-                                        <p className="text-sm md:text-base leading-relaxed">{m.text}</p>
-                                    </div>
-                                </div>
-                            ))}
-                            <div ref={scrollRef}></div>
-                        </div>
-
-                        <form onSubmit={sendMessage} className="p-6 bg-white/5 border-t border-white/10 flex gap-4">
-                            <button type="button" className="text-gray-400 hover:text-white transition px-2">
-                                <i className="fa-solid fa-paperclip text-xl"></i>
-                            </button>
-                            <input 
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                placeholder="Напишите что-нибудь..." 
-                                className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 px-6 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-gray-600"
-                            />
-                            <button type="submit" className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/30 transform active:scale-90">
-                                <i className="fa-solid fa-paper-plane text-xl"></i>
-                            </button>
-                        </form>
-                    </main>
+                <div class="flex h-screen items-center justify-center text-white">
+                    <h1 class="text-2xl font-bold">Pixel — Next Gen Messenger</h1>
                 </div>
             );
         };
-
-        const NavItem = ({ icon, label, active }) => (
-            <div className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all ${active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'hover:bg-white/5 text-gray-400'}`}>
-                <i className={`fa-solid ${icon} w-5 text-center`}></i>
-                <span className="font-semibold">{label}</span>
-            </div>
-        );
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<PixelApp />);
+        root.render(<App />);
     </script>
 </body>
 </html>
