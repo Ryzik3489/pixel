@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Messenger — Ecosystem 2026</title>
+    <title>Pixel — Full Messenger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0e1621; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .glass { background: rgba(23, 33, 43, 0.7); backdrop-filter: blur(20px) saturate(160%); border: 1px solid rgba(255,255,255,0.08); }
-        .tg-input { background: #17212b; border: 1px solid #242f3d; padding: 14px; border-radius: 12px; width: 100%; outline: none; transition: 0.2s; color: white; }
-        .tg-input:focus { border-color: #3390ec; box-shadow: 0 0 0 2px rgba(51, 144, 236, 0.2); }
-        .btn-blue { background: #3390ec; border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; transition: 0.2s; cursor: pointer; border: none; color: white; }
-        .btn-blue:hover { background: #2b7ecb; transform: translateY(-1px); }
-        .premium-border { border: 1px solid rgba(234, 179, 8, 0.3); background: rgba(234, 179, 8, 0.05); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #242f3d; border-radius: 10px; }
+        body { background-color: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .tg-input { background: #17212b; border: 1px solid #242f3d; padding: 12px; border-radius: 10px; width: 100%; outline: none; color: white; }
+        .btn-blue { background: #3390ec; border-radius: 10px; padding: 12px; font-weight: 600; width: 100%; cursor: pointer; border: none; color: white; transition: 0.2s; }
+        .btn-blue:hover { background: #2b7ecb; }
+        .sidebar { background: #17212b; width: 320px; border-right: 1px solid #080d14; }
+        .chat-bg { background: #0e1621; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-opacity: 0.1; }
+        .message-out { background: #2b5278; border-radius: 15px 15px 2px 15px; padding: 8px 12px; max-width: 80%; align-self: flex-end; }
+        .message-in { background: #182533; border-radius: 15px 15px 15px 2px; padding: 8px 12px; max-width: 80%; align-self: flex-start; }
     </style>
 </head>
 <body>
@@ -28,168 +27,132 @@
         const { useState, useEffect } = React;
 
         const BOT_TOKEN = "8780477035:AAH4_DeKaAfyRGScU7eSPpRjBpmJlv5ORTU";
+        // ID твоего чата (чтобы бот знал куда слать код)
+        const MY_CHAT_ID = "ТВОЙ_CHAT_ID"; 
 
         const App = () => {
-            const [view, setView] = useState('auth'); // auth, verify, profile, main
+            const [view, setView] = useState('auth'); 
+            const [activeChat, setActiveChat] = useState(0);
             const [phone, setPhone] = useState('+7');
-            const [inputCode, setInputCode] = useState('');
-            const [generatedCode, setGeneratedCode] = useState(null);
-            const [loading, setLoading] = useState(false);
+            const [myProfile, setMyProfile] = useState({ name: 'Илья', username: 'ilya_dev', bio: 'Work hard' });
 
-            // Логика авторизации через бота
-            const handleAuth = async () => {
-                setLoading(true);
-                const code = Math.floor(10000 + Math.random() * 90000).toString();
-                setGeneratedCode(code);
+            // Список чатов (Группы, Каналы, Люди)
+            const [chats] = useState([
+                { id: 0, name: "Избранное", status: "облако", type: "saved", lastMsg: "Файлы здесь" },
+                { id: 1, name: "Артем", status: "в сети", type: "user", lastMsg: "Привет, как проект?" },
+                { id: 2, name: "Дизайн Группа", status: "245 участников", type: "group", lastMsg: "Макет готов" },
+                { id: 3, name: "Новости IT", status: "1.2k подписчиков", type: "channel", lastMsg: "Вышел новый ИИ" }
+            ]);
 
-                try {
-                    // Сначала получаем ID последнего написавшего боту (то есть тебя)
-                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`);
-                    const data = await res.json();
-                    const chatId = data.result[data.result.length - 1].message.chat.id;
-
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=🔐 Твой код Pixel: ${code}`);
-                    setView('verify');
-                } catch (e) {
-                    alert("Ошибка! Сначала нажми START в боте.");
-                }
-                setLoading(false);
+            const handleLogin = async () => {
+                const code = Math.floor(1000 + Math.random() * 9000);
+                // Бот отправит код сразу, если ты хоть раз ему писал
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${MY_CHAT_ID}&text=Твой проверочный код: ${code}`);
+                const input = prompt("Введите код из Telegram:");
+                if(input) setView('main');
             };
 
-            const verifyCode = () => {
-                if (inputCode === generatedCode) setView('profile');
-                else alert("Неверный код!");
-            };
-
-            // --- ЭКРАН 1: ВХОД ---
             if (view === 'auth') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" className="w-20 mb-10 animate-pulse" />
-                    <h1 className="text-2xl font-bold mb-2">Pixel Identity</h1>
-                    <p className="text-gray-400 text-center mb-8 text-sm px-4">Введите номер. Код придет в Telegram бота.</p>
-                    <input className="tg-input mb-4" value={phone} onChange={e => setPhone(e.target.value)} />
-                    <button onClick={handleAuth} className="btn-blue">{loading ? "Связь с ботом..." : "ДАЛЕЕ"}</button>
+                <div className="flex flex-col items-center justify-center h-screen max-w-xs mx-auto text-center">
+                    <h1 className="text-3xl font-bold mb-8">Pixel</h1>
+                    <input className="tg-input mb-4" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Номер телефона" />
+                    <button onClick={handleLogin} className="btn-blue uppercase">Войти</button>
                 </div>
             );
 
-            // --- ЭКРАН 2: КОД ---
-            if (view === 'verify') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6 text-center">
-                    <div className="text-6xl mb-6">🤖</div>
-                    <h1 className="text-2xl font-bold mb-2">Проверь чат бота</h1>
-                    <p className="text-gray-400 mb-8 text-sm">Мы отправили 5-значный код.</p>
-                    <input className="tg-input text-center text-3xl tracking-[0.5em] mb-6" maxLength="5" value={inputCode} onChange={e => setInputCode(e.target.value)} />
-                    <button onClick={verifyCode} className="btn-blue">ПОДТВЕРДИТЬ</button>
-                </div>
-            );
-
-            // --- ЭКРАН 3: ПРОФИЛЬ (НОВИНКИ 2026) ---
-            if (view === 'profile') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6">
-                    <h1 className="text-2xl font-bold mb-8">Настройка личности</h1>
-                    <div className="space-y-4 w-full">
-                        <input className="tg-input" placeholder="Имя (@username)" />
-                        <div className="flex gap-2">
-                            <input className="tg-input" placeholder="Эмодзи-статус (🌙)" />
-                            <input className="tg-input" placeholder="Музыка в профиле" />
-                        </div>
-                        <div className="p-4 rounded-xl premium-border text-xs text-yellow-500 flex items-center">
-                            <i className="fa-solid fa-star mr-2"></i> Premium функции разблокированы
-                        </div>
-                        <button onClick={() => setView('main')} className="btn-blue">ВОЙТИ В ЭКОСИСТЕМУ</button>
-                    </div>
-                </div>
-            );
-
-            // --- ЭКРАН 4: МЕССЕНДЖЕР (ФИНАЛ) ---
             return (
                 <div className="flex h-screen w-full">
                     {/* Боковая панель */}
-                    <div className="w-80 flex flex-col bg-[#17212b] border-r border-black/40">
-                        <div className="p-4 flex items-center justify-between glass shadow-xl">
-                            <i className="fa-solid fa-bars text-gray-400 cursor-pointer"></i>
-                            <div className="font-bold text-sm tracking-wider uppercase">Pixel Messenger</div>
-                            <div className="text-yellow-500 font-bold text-xs bg-yellow-500/10 px-2 py-1 rounded-full border border-yellow-500/20">
-                                <i className="fa-solid fa-star text-[10px]"></i> 1.2k
-                            </div>
+                    <div className="sidebar flex flex-col">
+                        <div className="p-4 flex items-center space-x-3">
+                            <i className="fa-solid fa-bars text-gray-500 cursor-pointer" onClick={() => setView('settings')}></i>
+                            <input className="bg-[#242f3d] rounded-full px-4 py-1.5 text-sm w-full outline-none" placeholder="Поиск" />
+                        </div>
+                        
+                        {/* Список папок (условно вкладки) */}
+                        <div className="flex justify-around text-[11px] font-bold text-gray-500 border-b border-gray-800 pb-2">
+                            <span className="text-blue-400 border-b-2 border-blue-400 pb-1 px-2">Все</span>
+                            <span>Личные</span>
+                            <span>Группы</span>
+                            <span>Каналы</span>
                         </div>
 
                         <div className="flex-1 overflow-y-auto">
-                            <ChatItem name="Избранное" msg="Код: 55412" time="Только что" saved />
-                            <ChatItem name="Никита" msg="AI-редактор просто топ 🔥" time="12:45" online />
-                            <ChatItem name="Pixel Channel" msg="Обновление Mini Apps..." time="Вчера" channel />
+                            {chats.map(chat => (
+                                <div 
+                                    key={chat.id} 
+                                    onClick={() => setActiveChat(chat.id)}
+                                    className={`p-3 flex items-center cursor-pointer transition ${activeChat === chat.id ? 'bg-[#2b5278]' : 'hover:bg-[#232e3a]'}`}
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-blue-500 mr-3 flex items-center justify-center font-bold">
+                                        {chat.type === 'saved' ? <i className="fa-solid fa-bookmark"></i> : chat.name[0]}
+                                    </div>
+                                    <div className="flex-1 overflow-hidden">
+                                        <div className="flex justify-between"><span className="text-sm font-bold">{chat.name}</span><span className="text-[10px] text-gray-500">12:00</span></div>
+                                        <div className="text-xs text-gray-400 truncate">{chat.lastMsg}</div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
                     {/* Окно чата */}
-                    <div className="flex-1 flex flex-col bg-[#0e1621] relative">
-                        {/* Header чата */}
-                        <div className="h-16 glass flex items-center justify-between px-6 z-20">
-                            <div className="flex items-center">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 mr-3 flex items-center justify-center font-bold">Н</div>
+                    <div className="flex-1 flex flex-col chat-bg">
+                        {/* Header */}
+                        <div className="h-14 bg-[#17212b] flex items-center justify-between px-4 border-l border-black/20">
+                            <div className="flex items-center cursor-pointer">
+                                <div className="w-10 h-10 rounded-full bg-gray-700 mr-3 flex items-center justify-center text-sm">{chats[activeChat].name[0]}</div>
                                 <div>
-                                    <div className="text-sm font-bold flex items-center">Никита <i className="fa-solid fa-circle-check text-blue-400 text-[10px] ml-1"></i></div>
-                                    <div className="text-[10px] text-blue-400">в сети</div>
+                                    <div className="text-sm font-bold">{chats[activeChat].name}</div>
+                                    <div className="text-[11px] text-blue-400">{chats[activeChat].status}</div>
                                 </div>
                             </div>
-                            <div className="flex space-x-6 text-gray-400 text-lg">
-                                <i className="fa-solid fa-wand-magic-sparkles text-blue-400 cursor-pointer" title="AI Summary"></i>
-                                <i className="fa-solid fa-video cursor-pointer"></i>
-                                <i className="fa-solid fa-ellipsis-vertical cursor-pointer"></i>
+                            <div className="flex space-x-5 text-gray-400">
+                                <i className="fa-solid fa-magnifying-glass"></i>
+                                <i className="fa-solid fa-ellipsis-vertical"></i>
                             </div>
                         </div>
 
                         {/* Сообщения */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                            <div className="flex justify-center">
-                                <div className="glass px-4 py-1 rounded-full text-[10px] text-blue-300 border border-blue-500/20">
-                                    <i className="fa-solid fa-bolt mr-2"></i> AI: Краткое содержание чата готово
-                                </div>
-                            </div>
-                            <div className="flex justify-start">
-                                <div className="max-w-xs bg-[#182533] p-3 rounded-2xl rounded-bl-none shadow-md border border-white/5">
-                                    <p className="text-sm">Ты видел новые «Звезды»? Теперь можно платить прямо в чате!</p>
-                                    <span className="text-[9px] text-gray-500 block text-right mt-1">12:44</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <div className="w-32 h-32 rounded-full border-2 border-blue-500 bg-black overflow-hidden relative shadow-2xl">
-                                    <div className="absolute inset-0 flex items-center justify-center bg-blue-500/10">
-                                        <i className="fa-solid fa-play text-white text-3xl"></i>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
+                            <div className="message-in text-sm text-white">Привет! Как дела с разработкой мессенджера?</div>
+                            <div className="message-out text-sm text-white">Всё отлично, убрал всё лишнее, добавил папки и группы.</div>
                         </div>
 
                         {/* Ввод */}
-                        <div className="p-4 glass m-4 rounded-2xl flex items-center space-x-3 border border-white/5 shadow-2xl">
-                            <button className="text-gray-400 hover:text-blue-400 transition"><i className="fa-solid fa-paperclip text-xl"></i></button>
-                            <input className="bg-transparent flex-1 outline-none text-sm" placeholder="Сообщение..." />
-                            <button className="text-yellow-500/70 hover:text-yellow-500 transition"><i className="fa-solid fa-face-smile text-xl"></i></button>
-                            <button className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition shadow-lg">
-                                <i className="fa-solid fa-paper-plane text-sm"></i>
-                            </button>
+                        <div className="p-3 bg-[#17212b] flex items-center space-x-3">
+                            <label className="text-gray-400 hover:text-white cursor-pointer"><i className="fa-solid fa-paperclip text-xl"></i><input type="file" className="hidden" /></label>
+                            <input className="bg-transparent flex-1 outline-none text-sm" placeholder="Написать сообщение..." />
+                            <i className="fa-solid fa-microphone text-gray-400 text-xl"></i>
+                            <button className="text-blue-400 font-bold px-2">ОТПРАВИТЬ</button>
                         </div>
                     </div>
+
+                    {/* Настройки (скрытое окно) */}
+                    {view === 'settings' && (
+                        <div className="absolute inset-0 bg-black/50 flex justify-start z-50">
+                            <div className="w-80 bg-[#17212b] h-full p-6 shadow-2xl">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h2 className="text-xl font-bold">Настройки</h2>
+                                    <i className="fa-solid fa-xmark cursor-pointer" onClick={() => setView('main')}></i>
+                                </div>
+                                <div className="flex flex-col items-center mb-6">
+                                    <div className="w-20 h-20 bg-blue-600 rounded-full mb-4 flex items-center justify-center text-2xl font-bold">{myProfile.name[0]}</div>
+                                    <div className="font-bold">{myProfile.name}</div>
+                                    <div className="text-sm text-gray-400">@{myProfile.username}</div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="bg-[#242f3d] p-3 rounded-lg text-sm">Конфиденциальность</div>
+                                    <div className="bg-[#242f3d] p-3 rounded-lg text-sm">Данные и память</div>
+                                    <div className="bg-[#242f3d] p-3 rounded-lg text-sm">Папки с чатами</div>
+                                    <button onClick={() => setView('auth')} className="text-red-400 text-sm mt-4">Выйти из аккаунта</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
-
-        const ChatItem = ({ name, msg, time, online, saved, channel }) => (
-            <div className="p-4 flex items-center hover:bg-[#2b5278]/20 cursor-pointer transition border-b border-white/5">
-                <div className={`w-12 h-12 rounded-full mr-3 flex items-center justify-center font-bold text-white relative ${saved ? 'bg-blue-600' : channel ? 'bg-indigo-600' : 'bg-gray-700'}`}>
-                    {saved ? <i className="fa-solid fa-bookmark"></i> : channel ? <i className="fa-solid fa-bullhorn text-xs"></i> : name[0]}
-                    {online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#17212b] rounded-full"></div>}
-                </div>
-                <div className="flex-1 overflow-hidden">
-                    <div className="flex justify-between items-center mb-0.5">
-                        <span className="text-sm font-bold truncate">{name}</span>
-                        <span className="text-[10px] text-gray-500">{time}</span>
-                    </div>
-                    <p className="text-xs text-gray-400 truncate">{msg}</p>
-                </div>
-            </div>
-        );
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
