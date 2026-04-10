@@ -3,46 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Messenger — Final Build 2026</title>
-    
+    <title>Pixel Messenger — Ecosystem 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
-            authDomain: "pixel-7c9f0.firebaseapp.com",
-            projectId: "pixel-7c9f0",
-            storageBucket: "pixel-7c9f0.firebasestorage.app",
-            messagingSenderId: "1016081455742",
-            appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f",
-            measurementId: "G-E35TB02ENB"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        // Экспортируем в window для доступа из React
-        window.fbAuth = auth;
-        window.fbLogic = { RecaptchaVerifier, signInWithPhoneNumber };
-    </script>
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0e1621; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-panel { background: rgba(23, 33, 43, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-        .input-pixel { background: #17212b; border: 1px solid #242f3d; padding: 15px; border-radius: 12px; width: 100%; outline: none; transition: 0.3s; }
-        .input-pixel:focus { border-color: #3390ec; box-shadow: 0 0 10px rgba(51, 144, 236, 0.3); }
-        .btn-main { background: #3390ec; border-radius: 12px; padding: 15px; font-weight: bold; width: 100%; transition: 0.2s; cursor: pointer; }
-        .btn-main:hover { background: #2b7ecb; transform: scale(1.02); }
-        .btn-main:active { transform: scale(0.98); }
-        .video-circle { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #3390ec; overflow: hidden; background: #000; position: relative; }
+        body { background-color: #0e1621; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(23, 33, 43, 0.7); backdrop-filter: blur(20px) saturate(160%); border: 1px solid rgba(255,255,255,0.08); }
+        .tg-input { background: #17212b; border: 1px solid #242f3d; padding: 14px; border-radius: 12px; width: 100%; outline: none; transition: 0.2s; color: white; }
+        .tg-input:focus { border-color: #3390ec; box-shadow: 0 0 0 2px rgba(51, 144, 236, 0.2); }
+        .btn-blue { background: #3390ec; border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; transition: 0.2s; cursor: pointer; border: none; color: white; }
+        .btn-blue:hover { background: #2b7ecb; transform: translateY(-1px); }
+        .premium-border { border: 1px solid rgba(234, 179, 8, 0.3); background: rgba(234, 179, 8, 0.05); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #242f3d; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -51,140 +27,114 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        const BOT_TOKEN = "8780477035:AAH4_DeKaAfyRGScU7eSPpRjBpmJlv5ORTU";
+
         const App = () => {
-            const [step, setStep] = useState('phone'); // phone, verify, profile, pass, messenger
+            const [view, setView] = useState('auth'); // auth, verify, profile, main
             const [phone, setPhone] = useState('+7');
-            const [otp, setOtp] = useState('');
-            const [confirmation, setConfirmation] = useState(null);
+            const [inputCode, setInputCode] = useState('');
+            const [generatedCode, setGeneratedCode] = useState(null);
             const [loading, setLoading] = useState(false);
 
-            useEffect(() => {
-                if (window.fbAuth) {
-                    window.recaptcha = new window.fbLogic.RecaptchaVerifier(window.fbAuth, 'recaptcha-container', {
-                        'size': 'invisible'
-                    });
-                }
-            }, []);
-
-            const sendCode = async () => {
+            // Логика авторизации через бота
+            const handleAuth = async () => {
                 setLoading(true);
+                const code = Math.floor(10000 + Math.random() * 90000).toString();
+                setGeneratedCode(code);
+
                 try {
-                    const result = await window.fbLogic.signInWithPhoneNumber(window.fbAuth, phone, window.recaptcha);
-                    setConfirmation(result);
-                    setStep('verify');
-                } catch (err) {
-                    alert("Ошибка: " + err.message);
+                    // Сначала получаем ID последнего написавшего боту (то есть тебя)
+                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`);
+                    const data = await res.json();
+                    const chatId = data.result[data.result.length - 1].message.chat.id;
+
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=🔐 Твой код Pixel: ${code}`);
+                    setView('verify');
+                } catch (e) {
+                    alert("Ошибка! Сначала нажми START в боте.");
                 }
                 setLoading(false);
             };
 
-            const confirmCode = async () => {
-                setLoading(true);
-                try {
-                    await confirmation.confirm(otp);
-                    setStep('profile');
-                } catch (err) {
-                    alert("Неверный код!");
-                }
-                setLoading(false);
+            const verifyCode = () => {
+                if (inputCode === generatedCode) setView('profile');
+                else alert("Неверный код!");
             };
 
-            // --- 1. ЭКРАН НОМЕРА ---
-            if (step === 'phone') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-xs mx-auto text-center">
-                    <div id="recaptcha-container"></div>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" className="w-20 mb-10" />
-                    <h1 className="text-2xl font-bold mb-2">Ваш номер</h1>
-                    <p className="text-gray-400 text-sm mb-8">Pixel отправит сообщение с кодом для подтверждения вашего номера.</p>
-                    <input className="input-pixel mb-4" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 ..." />
-                    <button onClick={sendCode} className="btn-main uppercase" disabled={loading}>
-                        {loading ? 'Загрузка...' : 'Далее'}
-                    </button>
+            // --- ЭКРАН 1: ВХОД ---
+            if (view === 'auth') return (
+                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" className="w-20 mb-10 animate-pulse" />
+                    <h1 className="text-2xl font-bold mb-2">Pixel Identity</h1>
+                    <p className="text-gray-400 text-center mb-8 text-sm px-4">Введите номер. Код придет в Telegram бота.</p>
+                    <input className="tg-input mb-4" value={phone} onChange={e => setPhone(e.target.value)} />
+                    <button onClick={handleAuth} className="btn-blue">{loading ? "Связь с ботом..." : "ДАЛЕЕ"}</button>
                 </div>
             );
 
-            // --- 2. ЭКРАН ВЕРИФИКАЦИИ ---
-            if (step === 'verify') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-xs mx-auto text-center">
-                    <div className="text-5xl mb-6">📩</div>
-                    <h1 className="text-2xl font-bold mb-2">{phone}</h1>
-                    <p className="text-gray-400 text-sm mb-8">Введите 6-значный код из SMS.</p>
-                    <input className="input-pixel mb-4 text-center text-2xl tracking-widest" maxLength="6" value={otp} onChange={e => setOtp(e.target.value)} placeholder="••••••" />
-                    <button onClick={confirmCode} className="btn-main uppercase" disabled={loading}>Подтвердить</button>
-                    <button onClick={() => setStep('phone')} className="mt-4 text-blue-400 text-sm">Изменить номер</button>
+            // --- ЭКРАН 2: КОД ---
+            if (view === 'verify') return (
+                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6 text-center">
+                    <div className="text-6xl mb-6">🤖</div>
+                    <h1 className="text-2xl font-bold mb-2">Проверь чат бота</h1>
+                    <p className="text-gray-400 mb-8 text-sm">Мы отправили 5-значный код.</p>
+                    <input className="tg-input text-center text-3xl tracking-[0.5em] mb-6" maxLength="5" value={inputCode} onChange={e => setInputCode(e.target.value)} />
+                    <button onClick={verifyCode} className="btn-blue">ПОДТВЕРДИТЬ</button>
                 </div>
             );
 
-            // --- 3. ЭКРАН ПРОФИЛЯ ---
-            if (step === 'profile') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-xs mx-auto">
-                    <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-3xl mb-8 border-2 border-dashed border-gray-500">
-                        <i className="fa-solid fa-user-plus text-gray-400"></i>
+            // --- ЭКРАН 3: ПРОФИЛЬ (НОВИНКИ 2026) ---
+            if (view === 'profile') return (
+                <div className="flex flex-col items-center justify-center h-screen max-w-sm mx-auto p-6">
+                    <h1 className="text-2xl font-bold mb-8">Настройка личности</h1>
+                    <div className="space-y-4 w-full">
+                        <input className="tg-input" placeholder="Имя (@username)" />
+                        <div className="flex gap-2">
+                            <input className="tg-input" placeholder="Эмодзи-статус (🌙)" />
+                            <input className="tg-input" placeholder="Музыка в профиле" />
+                        </div>
+                        <div className="p-4 rounded-xl premium-border text-xs text-yellow-500 flex items-center">
+                            <i className="fa-solid fa-star mr-2"></i> Premium функции разблокированы
+                        </div>
+                        <button onClick={() => setView('main')} className="btn-blue">ВОЙТИ В ЭКОСИСТЕМУ</button>
                     </div>
-                    <h1 className="text-2xl font-bold mb-6">Настройка профиля</h1>
-                    <input className="input-pixel mb-3" placeholder="Имя (обязательно)" id="userName" />
-                    <input className="input-pixel mb-6" placeholder="Фамилия (опционально)" />
-                    <button onClick={() => setStep('pass')} className="btn-main">СОХРАНИТЬ</button>
                 </div>
             );
 
-            // --- 4. ОБЛАЧНЫЙ ПАРОЛЬ ---
-            if (step === 'pass') return (
-                <div className="flex flex-col items-center justify-center h-screen max-w-xs mx-auto text-center">
-                    <div className="text-5xl mb-6">🔐</div>
-                    <h1 className="text-2xl font-bold mb-2">Защита аккаунта</h1>
-                    <p className="text-gray-400 text-sm mb-8">Установите облачный пароль для двухэтапной аутентификации.</p>
-                    <input type="password" title="cloud-password" className="input-pixel mb-6" placeholder="Введите пароль" />
-                    <button onClick={() => setStep('messenger')} className="btn-main">ГОТОВО</button>
-                </div>
-            );
-
-            // --- 5. МЕССЕНДЖЕР (ФИНАЛ) ---
+            // --- ЭКРАН 4: МЕССЕНДЖЕР (ФИНАЛ) ---
             return (
-                <div className="flex h-screen overflow-hidden">
-                    {/* Список чатов */}
+                <div className="flex h-screen w-full">
+                    {/* Боковая панель */}
                     <div className="w-80 flex flex-col bg-[#17212b] border-r border-black/40">
-                        <div className="p-4 flex items-center justify-between border-b border-gray-800">
-                            <i className="fa-solid fa-bars text-gray-400"></i>
-                            <div className="font-bold tracking-tight">PIXEL 2026</div>
-                            <div className="text-yellow-500 text-xs font-bold px-2 py-1 bg-yellow-500/10 rounded-full border border-yellow-500/20">
-                                <i className="fa-solid fa-star"></i> 100
+                        <div className="p-4 flex items-center justify-between glass shadow-xl">
+                            <i className="fa-solid fa-bars text-gray-400 cursor-pointer"></i>
+                            <div className="font-bold text-sm tracking-wider uppercase">Pixel Messenger</div>
+                            <div className="text-yellow-500 font-bold text-xs bg-yellow-500/10 px-2 py-1 rounded-full border border-yellow-500/20">
+                                <i className="fa-solid fa-star text-[10px]"></i> 1.2k
                             </div>
                         </div>
-                        {/* Папки */}
-                        <div className="flex space-x-5 px-4 py-3 text-xs font-bold border-b border-gray-800 overflow-x-auto whitespace-nowrap scrollbar-hide">
-                            <span className="text-blue-400 border-b-2 border-blue-400 pb-2">Все</span>
-                            <span className="text-gray-500">Личные</span>
-                            <span className="text-gray-500">Работа</span>
-                            <span className="text-gray-500">Бизнес</span>
-                        </div>
+
                         <div className="flex-1 overflow-y-auto">
-                            <div className="p-4 flex items-center bg-[#2b5278]/20">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-blue-700 mr-3 flex items-center justify-center font-bold">И</div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between"><span className="text-sm font-bold">Избранное</span> <span className="text-[10px] text-gray-500">12:00</span></div>
-                                    <div className="text-xs text-blue-400 truncate">t.me/pixel_messenger_bot</div>
-                                </div>
-                            </div>
-                            <ChatItem name="Никита" msg="Код пришел?" time="11:55" online />
-                            <ChatItem name="Pixel Support" msg="Добро пожаловать в экосистему!" time="10:30" />
+                            <ChatItem name="Избранное" msg="Код: 55412" time="Только что" saved />
+                            <ChatItem name="Никита" msg="AI-редактор просто топ 🔥" time="12:45" online />
+                            <ChatItem name="Pixel Channel" msg="Обновление Mini Apps..." time="Вчера" channel />
                         </div>
                     </div>
 
                     {/* Окно чата */}
                     <div className="flex-1 flex flex-col bg-[#0e1621] relative">
                         {/* Header чата */}
-                        <div className="h-16 glass-panel flex items-center justify-between px-6 z-10 shadow-xl">
+                        <div className="h-16 glass flex items-center justify-between px-6 z-20">
                             <div className="flex items-center">
-                                <div className="w-10 h-10 rounded-full bg-orange-500 mr-3 flex items-center justify-center font-bold">Н</div>
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 mr-3 flex items-center justify-center font-bold">Н</div>
                                 <div>
-                                    <div className="text-sm font-bold flex items-center">Никита <i className="fa-solid fa-check-double text-blue-400 text-[10px] ml-1"></i></div>
-                                    <div className="text-[10px] text-blue-400 font-medium">в сети</div>
+                                    <div className="text-sm font-bold flex items-center">Никита <i className="fa-solid fa-circle-check text-blue-400 text-[10px] ml-1"></i></div>
+                                    <div className="text-[10px] text-blue-400">в сети</div>
                                 </div>
                             </div>
                             <div className="flex space-x-6 text-gray-400 text-lg">
-                                <i className="fa-solid fa-video cursor-pointer hover:text-white transition"></i>
-                                <i className="fa-solid fa-magnifying-glass cursor-pointer hover:text-white transition"></i>
+                                <i className="fa-solid fa-wand-magic-sparkles text-blue-400 cursor-pointer" title="AI Summary"></i>
+                                <i className="fa-solid fa-video cursor-pointer"></i>
                                 <i className="fa-solid fa-ellipsis-vertical cursor-pointer"></i>
                             </div>
                         </div>
@@ -192,51 +142,48 @@
                         {/* Сообщения */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             <div className="flex justify-center">
-                                <div className="glass-panel px-4 py-1.5 rounded-full text-[10px] text-blue-200 border border-blue-500/20">
-                                    <i className="fa-solid fa-robot mr-2"></i> AI-пересказ: Обсуждение функционала и 2FA защиты.
+                                <div className="glass px-4 py-1 rounded-full text-[10px] text-blue-300 border border-blue-500/20">
+                                    <i className="fa-solid fa-bolt mr-2"></i> AI: Краткое содержание чата готово
                                 </div>
                             </div>
                             <div className="flex justify-start">
-                                <div className="max-w-xs bg-[#182533] p-3 rounded-2xl rounded-bl-none shadow-md">
-                                    <p className="text-sm">Привет! Получилось настроить настоящие SMS через Firebase?</p>
-                                    <span className="text-[9px] text-gray-500 block text-right mt-1">11:58</span>
+                                <div className="max-w-xs bg-[#182533] p-3 rounded-2xl rounded-bl-none shadow-md border border-white/5">
+                                    <p className="text-sm">Ты видел новые «Звезды»? Теперь можно платить прямо в чате!</p>
+                                    <span className="text-[9px] text-gray-500 block text-right mt-1">12:44</span>
                                 </div>
                             </div>
-                            {/* Кружочек */}
                             <div className="flex justify-end">
-                                <div className="video-circle shadow-lg">
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <i className="fa-solid fa-play text-white opacity-50"></i>
+                                <div className="w-32 h-32 rounded-full border-2 border-blue-500 bg-black overflow-hidden relative shadow-2xl">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-blue-500/10">
+                                        <i className="fa-solid fa-play text-white text-3xl"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Input Area (Эффект стекла) */}
-                        <div className="p-4 bg-transparent z-10">
-                            <div className="max-w-4xl mx-auto glass-panel rounded-2xl p-2 flex items-center space-x-2 border border-white/5 shadow-2xl">
-                                <button className="p-3 text-gray-400 hover:text-blue-400"><i className="fa-solid fa-paperclip text-xl"></i></button>
-                                <input className="bg-transparent flex-1 outline-none text-sm px-2" placeholder="Сообщение" />
-                                <button className="p-3 text-gray-400 hover:text-yellow-500"><i className="fa-solid fa-face-smile text-xl"></i></button>
-                                <button className="bg-[#3390ec] w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition">
-                                    <i className="fa-solid fa-paper-plane text-white text-sm"></i>
-                                </button>
-                            </div>
+                        {/* Ввод */}
+                        <div className="p-4 glass m-4 rounded-2xl flex items-center space-x-3 border border-white/5 shadow-2xl">
+                            <button className="text-gray-400 hover:text-blue-400 transition"><i className="fa-solid fa-paperclip text-xl"></i></button>
+                            <input className="bg-transparent flex-1 outline-none text-sm" placeholder="Сообщение..." />
+                            <button className="text-yellow-500/70 hover:text-yellow-500 transition"><i className="fa-solid fa-face-smile text-xl"></i></button>
+                            <button className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition shadow-lg">
+                                <i className="fa-solid fa-paper-plane text-sm"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const ChatItem = ({ name, msg, time, online }) => (
-            <div className="p-4 flex items-center hover:bg-[#242f3d] cursor-pointer transition">
-                <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gray-700 mr-3 flex items-center justify-center font-bold">{name[0]}</div>
-                    {online && <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 border-2 border-[#17212b] rounded-full"></div>}
+        const ChatItem = ({ name, msg, time, online, saved, channel }) => (
+            <div className="p-4 flex items-center hover:bg-[#2b5278]/20 cursor-pointer transition border-b border-white/5">
+                <div className={`w-12 h-12 rounded-full mr-3 flex items-center justify-center font-bold text-white relative ${saved ? 'bg-blue-600' : channel ? 'bg-indigo-600' : 'bg-gray-700'}`}>
+                    {saved ? <i className="fa-solid fa-bookmark"></i> : channel ? <i className="fa-solid fa-bullhorn text-xs"></i> : name[0]}
+                    {online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#17212b] rounded-full"></div>}
                 </div>
                 <div className="flex-1 overflow-hidden">
-                    <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-bold">{name}</span>
+                    <div className="flex justify-between items-center mb-0.5">
+                        <span className="text-sm font-bold truncate">{name}</span>
                         <span className="text-[10px] text-gray-500">{time}</span>
                     </div>
                     <p className="text-xs text-gray-400 truncate">{msg}</p>
