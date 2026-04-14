@@ -3,93 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Messenger</title>
+    <title>Pixel Pro</title>
     <style>
         :root {
-            --bg: #f0f2f5;
-            --sidebar-bg: #ffffff;
-            --text: #1c1e21;
-            --accent: #0084ff;
-            --my-msg: #0084ff;
-            --other-msg: #e4e6eb;
-            --input-bg: #f0f2f5;
+            --bg: #f0f2f5; --sidebar: #ffffff; --text: #1c1e21; --accent: #0084ff;
+            --msg-me: #0084ff; --msg-other: #e4e6eb;
         }
-
         [data-theme="dark"] {
-            --bg: #18191a;
-            --sidebar-bg: #242526;
-            --text: #e4e6eb;
-            --accent: #2e89ff;
-            --my-msg: #2e89ff;
-            --other-msg: #3a3b3c;
-            --input-bg: #3a3b3c;
+            --bg: #18191a; --sidebar: #242526; --text: #e4e6eb; --accent: #2e89ff;
+            --msg-me: #2e89ff; --msg-other: #3a3b3c;
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+
+        /* --- Боковая панель (Sidebar) --- */
+        #side-menu {
+            position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
+            background: var(--sidebar); z-index: 100; transition: 0.3s;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2); padding: 20px;
+        }
+        #side-menu.active { left: 0; }
+        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .menu-item:hover { background: rgba(0,0,0,0.05); }
+
+        /* --- Интерфейс --- */
+        header { background: var(--sidebar); padding: 10px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .menu-btn { font-size: 24px; cursor: pointer; }
+
+        #main-screen { display: none; height: 100vh; flex-direction: column; }
+        #chat-window { flex: 1; display: flex; flex-direction: column; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
         
-        #app { display: flex; height: 100vh; flex-direction: column; position: relative; }
+        .msg { max-width: 70%; padding: 10px; border-radius: 12px; margin: 5px 0; position: relative; }
+        .msg.me { align-self: flex-end; background: var(--msg-me); color: white; }
+        .msg.other { align-self: flex-start; background: var(--msg-other); }
         
-        /* Авторизация */
-        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
-        input { padding: 12px; margin: 5px; border-radius: 8px; border: 1px solid #ccc; width: 260px; background: var(--sidebar-bg); color: var(--text); outline: none; }
-        button { padding: 12px 24px; border-radius: 8px; border: none; background: var(--accent); color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { opacity: 0.9; }
+        /* Цвета имен */
+        .sender-name { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
 
-        /* Основной интерфейс */
-        #main-screen { display: none; flex: 1; flex-direction: row; overflow: hidden; }
-        #sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        #chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); }
-
-        /* Список чатов */
-        .chat-header { padding: 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .chat-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; background: var(--sidebar-bg); }
-
-        /* Окно сообщений */
-        #messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-        .msg { max-width: 75%; padding: 10px 15px; border-radius: 18px; margin: 4px 0; font-size: 14px; position: relative; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg.me { align-self: flex-end; background: var(--my-msg); color: white; border-bottom-right-radius: 4px; }
-        .msg.other { align-self: flex-start; background: var(--other-msg); border-bottom-left-radius: 4px; }
+        #input-bar { padding: 15px; background: var(--sidebar); display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc; background: var(--bg); color: var(--text); }
         
-        .status { font-size: 10px; margin-left: 8px; opacity: 0.7; vertical-align: bottom; }
-
-        /* Поле ввода */
-        #input-area { padding: 15px; background: var(--sidebar-bg); display: flex; gap: 10px; border-top: 1px solid rgba(0,0,0,0.1); }
-        #msg-input { flex: 1; border: none; background: var(--input-bg); margin: 0; width: auto; }
-
-        .theme-toggle { position: absolute; top: 15px; right: 15px; font-size: 22px; cursor: pointer; z-index: 10; }
+        /* Стили профиля */
+        .profile-setup { display: none; padding: 20px; background: var(--sidebar); border-radius: 15px; margin: 20px; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+<div id="side-menu">
+    <h3 id="user-display-name">Загрузка...</h3>
+    <p id="user-phone" style="font-size: 12px; opacity: 0.6;"></p>
+    <hr>
+    <div class="menu-item" onclick="openProfile()">👤 Мой профиль</div>
+    <div class="menu-item" onclick="alert('В разработке...')">👥 Создать группу</div>
+    <div class="menu-item" onclick="openSaved()">🔖 Избранное</div>
+    <div class="menu-item" onclick="toggleTheme()">🌓 Ночной режим</div>
+    <br>
+    <button onclick="closeMenu()" style="width: 100%">Закрыть</button>
+</div>
 
-    <div id="auth-screen">
-        <h1 style="color: var(--accent)">Pixel</h1>
-        <p>Введите номер для входа</p>
-        <input type="tel" id="phone-number" placeholder="+7 700 000 00 00">
+<div id="app">
+    <div id="auth-screen" style="text-align: center; margin-top: 100px;">
+        <h1>Pixel</h1>
         <div id="recaptcha-container"></div>
-        <button id="btn-send-code">Отправить SMS</button>
-        
-        <input type="text" id="sms-code" placeholder="Код подтверждения" style="display:none">
-        <button id="btn-verify-code" style="display:none">Подтвердить</button>
+        <input type="tel" id="phone" placeholder="+7...">
+        <button onclick="sendOTP()">Войти</button>
     </div>
 
     <div id="main-screen">
-        <div id="sidebar">
-            <div class="chat-header">Pixel Чаты</div>
-            <div id="chat-list">
-                <div class="chat-item" style="border-left: 4px solid var(--accent)">
-                    <strong>Общий канал</strong><br>
-                    <small style="opacity:0.6">Все пользователи Pixel</small>
-                </div>
-            </div>
+        <header>
+            <div class="menu-btn" onclick="openMenu()">☰</div>
+            <div id="chat-title">Pixel Global</div>
+        </header>
+        
+        <div id="profile-area" class="profile-setup">
+            <h4>Настройки профиля</h4>
+            <input type="text" id="set-name" placeholder="Твое имя">
+            <input type="text" id="set-bio" placeholder="О себе">
+            <p>Цвет ника:</p>
+            <input type="color" id="set-color" value="#0084ff">
+            <button onclick="saveProfile()">Сохранить</button>
         </div>
-        <div id="chat-area">
-            <div id="messages-container"></div>
-            <div id="input-area">
-                <input type="text" id="msg-input" placeholder="Напишите сообщение...">
-                <button id="btn-send">📡</button>
+
+        <div id="chat-window">
+            <div id="messages"></div>
+            <div id="input-bar">
+                <input type="text" id="msg-input" placeholder="Сообщение...">
+                <button onclick="sendMsg()">🚀</button>
             </div>
         </div>
     </div>
@@ -98,109 +98,107 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Твой конфиг Pixel
     const firebaseConfig = {
         apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
         authDomain: "pixel-7c9f0.firebaseapp.com",
         projectId: "pixel-7c9f0",
         storageBucket: "pixel-7c9f0.firebasestorage.app",
         messagingSenderId: "1016081455742",
-        appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f",
-        measurementId: "G-E35TB02ENB"
+        appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let confirmationResult;
-    let currentUser = null;
+    window.openMenu = () => document.getElementById('side-menu').classList.add('active');
+    window.closeMenu = () => document.getElementById('side-menu').classList.remove('active');
 
-    // Инициализация ReCaptcha
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+    // Авторизация
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
+    window.sendOTP = async () => {
+        const phone = document.getElementById('phone').value;
+        const confirmation = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+        const code = prompt("Введите код из SMS (или тестовый):");
+        const result = await confirmation.confirm(code);
+        initUser(result.user);
+    };
 
-    // Отправка SMS
-    document.getElementById('btn-send-code').onclick = async () => {
-        const phone = document.getElementById('phone-number').value;
-        if(!phone) return alert("Введите номер!");
+    async function initUser(user) {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'flex';
         
-        try {
-            confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-            document.getElementById('phone-number').style.display = 'none';
-            document.getElementById('btn-send-code').style.display = 'none';
-            document.getElementById('sms-code').style.display = 'block';
-            document.getElementById('btn-verify-code').style.display = 'block';
-        } catch (err) {
-            alert("Ошибка: " + err.message);
+        // Загружаем данные профиля
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            document.getElementById('user-display-name').innerText = data.name || "Пользователь";
         }
+        document.getElementById('user-phone').innerText = user.phoneNumber;
+        loadMessages();
+    }
+
+    // Кастомизация профиля
+    window.openProfile = () => {
+        const area = document.getElementById('profile-area');
+        area.style.display = area.style.display === 'block' ? 'none' : 'block';
     };
 
-    // Проверка кода
-    document.getElementById('btn-verify-code').onclick = async () => {
-        const code = document.getElementById('sms-code').value;
-        try {
-            const result = await confirmationResult.confirm(code);
-            currentUser = result.user;
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-screen').style.display = 'flex';
-            loadMessages();
-        } catch (err) {
-            alert("Неверный код!");
-        }
+    window.saveProfile = async () => {
+        const user = auth.currentUser;
+        await setDoc(doc(db, "users", user.uid), {
+            name: document.getElementById('set-name').value,
+            bio: document.getElementById('set-bio').value,
+            color: document.getElementById('set-color').value,
+            phone: user.phoneNumber
+        }, { merge: true });
+        alert("Профиль обновлен!");
+        location.reload();
     };
 
-    // Отправка сообщения
-    async function sendMessage() {
+    // Чат
+    window.sendMsg = async () => {
         const text = document.getElementById('msg-input').value;
-        if (!text.trim()) return;
-        
-        await addDoc(collection(db, "global_chat"), {
-            uid: currentUser.uid,
-            phone: currentUser.phoneNumber,
-            text: text,
+        const user = auth.currentUser;
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userData = userDoc.data() || {};
+
+        await addDoc(collection(db, "messages"), {
+            text,
+            uid: user.uid,
+            name: userData.name || user.phoneNumber,
+            color: userData.color || "#0084ff",
             timestamp: serverTimestamp()
         });
         document.getElementById('msg-input').value = "";
-    }
+    };
 
-    // Загрузка сообщений в реальном времени
     function loadMessages() {
-        const q = query(collection(db, "global_chat"), orderBy("timestamp", "asc"));
-        onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('messages-container');
+        const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+        onSnapshot(q, (snap) => {
+            const container = document.getElementById('messages');
             container.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const msgDiv = document.createElement('div');
-                const isMe = data.uid === currentUser.uid;
-                msgDiv.className = `msg ${isMe ? 'me' : 'other'}`;
-                
-                // Время или галочка
-                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
-                
-                msgDiv.innerHTML = `
-                    <div style="font-size: 10px; opacity: 0.6; margin-bottom: 3px;">${isMe ? 'Вы' : data.phone}</div>
-                    ${data.text} 
-                    <span class="status">${isMe ? '✓✓' : ''} ${time}</span>
+            snap.forEach(d => {
+                const m = d.data();
+                const isMe = m.uid === auth.currentUser.uid;
+                container.innerHTML += `
+                    <div class="msg ${isMe ? 'me' : 'other'}">
+                        <div class="sender-name" style="color: ${isMe ? '#fff' : m.color}">${m.name}</div>
+                        ${m.text}
+                    </div>
                 `;
-                container.appendChild(msgDiv);
             });
             container.scrollTop = container.scrollHeight;
         });
     }
 
-    document.getElementById('btn-send').onclick = sendMessage;
-    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    window.toggleTheme = () => {
+        document.body.getAttribute('data-theme') === 'dark' ? 
+        document.body.removeAttribute('data-theme') : 
+        document.body.setAttribute('data-theme', 'dark');
+    };
 </script>
-
-<script>
-    function toggleTheme() {
-        const body = document.body;
-        body.getAttribute('data-theme') === 'dark' ? body.removeAttribute('data-theme') : body.setAttribute('data-theme', 'dark');
-    }
-</script>
-
 </body>
 </html>
