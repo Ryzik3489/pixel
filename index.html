@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Ultra Messenger</title>
+    <title>Pixel Ultra | Messenger</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="light">
@@ -17,49 +17,68 @@
         <div class="menu-content">
             <div class="menu-item" id="btn-create-group">👥 Создать группу</div>
             <div class="menu-item" id="btn-create-channel">📢 Создать канал</div>
-            <div class="menu-item" id="btn-profile-settings">⚙️ Настройки профиля</div>
+            <div class="menu-item" id="btn-profile-settings">⚙️ Профиль</div>
             <div class="menu-item" id="btn-toggle-theme">🌓 Сменить тему</div>
         </div>
     </div>
-    <div class="overlay"></div>
+    
+    <div class="overlay" id="menu-overlay"></div>
 
     <div id="app">
         <div id="auth-screen">
-            <h1>Pixel</h1>
-            <div id="recaptcha-container"></div>
-            <input type="tel" id="phone" placeholder="+7 700 000 0000">
-            <button id="btn-send-otp">Войти</button>
-            <div id="otp-box" style="display:none">
-                <input type="text" id="otp-code" placeholder="Код из SMS">
-                <button id="btn-verify-otp">Подтвердить</button>
+            <div class="auth-card">
+                <h1>Pixel</h1>
+                <p>Введите номер для входа</p>
+                <div id="recaptcha-container"></div>
+                <input type="tel" id="phone" placeholder="+7 777 000 0000">
+                <button id="btn-send-otp">Отправить SMS</button>
+                
+                <div id="otp-box" style="display:none; margin-top: 15px;">
+                    <input type="text" id="otp-code" placeholder="Код подтверждения">
+                    <button id="btn-verify-otp">Войти в Pixel</button>
+                </div>
             </div>
         </div>
 
         <div id="main-screen" style="display:none">
+            
             <div class="sidebar-chats">
-                <header>
-                    <div class="menu-trigger">☰</div>
-                    <input type="text" id="search-input" placeholder="Поиск @юзера или чата...">
+                <header class="chat-list-header">
+                    <div class="menu-trigger" id="open-menu">☰</div>
+                    <div class="search-container">
+                        <input type="text" id="search-input" placeholder="Поиск @юзера или чата...">
+                    </div>
                 </header>
-                <div class="tabs">
+                
+                <nav class="tabs">
                     <div class="tab active" data-type="all">Все</div>
                     <div class="tab" data-type="group">Группы</div>
                     <div class="tab" data-type="channel">Каналы</div>
-                </div>
-                <div id="chat-list"></div>
+                </nav>
+
+                <div id="chat-list">
+                    </div>
             </div>
 
             <div class="chat-view">
-                <div id="chat-header">
-                    <h3 id="active-title">Выберите чат</h3>
-                    <button id="btn-add-member" style="display:none">+ Добавить</button>
-                </div>
-                <div id="messages-area"></div>
+                <header id="chat-header">
+                    <div class="chat-info">
+                        <h3 id="active-title">Выберите, кому написать</h3>
+                        <span id="chat-status">в сети</span>
+                    </div>
+                    <button id="btn-add-member" style="display:none" title="Добавить в группу">+</button>
+                </header>
+
+                <div id="messages-area">
+                    </div>
+
                 <div id="input-area" style="display:none">
-                    <input type="text" id="message-input" placeholder="Сообщение...">
-                    <button id="btn-send">🚀</button>
+                    <button class="attach-btn">📎</button>
+                    <input type="text" id="message-input" placeholder="Напишите сообщение...">
+                    <button id="btn-send">Отправить</button>
                 </div>
             </div>
+
         </div>
     </div>
 
