@@ -3,186 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Messenger Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
-            authDomain: "pixel-7c9f0.firebaseapp.com",
-            projectId: "pixel-7c9f0",
-            storageBucket: "pixel-7c9f0.firebasestorage.app",
-            messagingSenderId: "1016081455742",
-            appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);
-        window.fb = { doc, setDoc, getDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, orderBy };
-    </script>
-
+    <title>Pixel Messenger</title>
     <style>
-        body { background: #0e1621; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .glass { background: rgba(23, 33, 43, 0.95); backdrop-filter: blur(20px); }
-        .sidebar { width: 350px; border-right: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; position: relative; margin-bottom: 6px; }
-        .msg-out { background: #2b5278; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg-in { background: #182533; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .setting-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-radius: 10px; transition: 0.2s; }
-        .setting-item:hover { background: rgba(255,255,255,0.05); }
-        .setting-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-right: 15px; }
+        :root {
+            --bg: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --text: #1c1e21;
+            --accent: #0084ff;
+            --my-msg: #0084ff;
+            --other-msg: #e4e6eb;
+            --input-bg: #f0f2f5;
+        }
+
+        [data-theme="dark"] {
+            --bg: #18191a;
+            --sidebar-bg: #242526;
+            --text: #e4e6eb;
+            --accent: #2e89ff;
+            --my-msg: #2e89ff;
+            --other-msg: #3a3b3c;
+            --input-bg: #3a3b3c;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; overflow: hidden; }
+        
+        #app { display: flex; height: 100vh; flex-direction: column; position: relative; }
+        
+        /* Авторизация */
+        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+        input { padding: 12px; margin: 5px; border-radius: 8px; border: 1px solid #ccc; width: 260px; background: var(--sidebar-bg); color: var(--text); outline: none; }
+        button { padding: 12px 24px; border-radius: 8px; border: none; background: var(--accent); color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+
+        /* Основной интерфейс */
+        #main-screen { display: none; flex: 1; flex-direction: row; overflow: hidden; }
+        #sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        #chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); }
+
+        /* Список чатов */
+        .chat-header { padding: 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .chat-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; background: var(--sidebar-bg); }
+
+        /* Окно сообщений */
+        #messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        .msg { max-width: 75%; padding: 10px 15px; border-radius: 18px; margin: 4px 0; font-size: 14px; position: relative; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg.me { align-self: flex-end; background: var(--my-msg); color: white; border-bottom-right-radius: 4px; }
+        .msg.other { align-self: flex-start; background: var(--other-msg); border-bottom-left-radius: 4px; }
+        
+        .status { font-size: 10px; margin-left: 8px; opacity: 0.7; vertical-align: bottom; }
+
+        /* Поле ввода */
+        #input-area { padding: 15px; background: var(--sidebar-bg); display: flex; gap: 10px; border-top: 1px solid rgba(0,0,0,0.1); }
+        #msg-input { flex: 1; border: none; background: var(--input-bg); margin: 0; width: auto; }
+
+        .theme-toggle { position: absolute; top: 15px; right: 15px; font-size: 22px; cursor: pointer; z-index: 10; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<div id="app">
+    <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
 
-        const App = () => {
-            const [accounts, setAccounts] = useState(JSON.parse(localStorage.getItem('pixel_accounts')) || []);
-            const [activeIdx, setActiveIdx] = useState(0);
-            const [view, setView] = useState('chats'); // 'chats' или 'settings'
-            const [chats, setChats] = useState([]);
-            const [activeChat, setActiveChat] = useState(null);
-            const [messages, setMessages] = useState([]);
-            const [input, setInput] = useState('');
-            const user = accounts[activeIdx];
+    <div id="auth-screen">
+        <h1 style="color: var(--accent)">Pixel</h1>
+        <p>Введите номер для входа</p>
+        <input type="tel" id="phone-number" placeholder="+7 700 000 00 00">
+        <div id="recaptcha-container"></div>
+        <button id="btn-send-code">Отправить SMS</button>
+        
+        <input type="text" id="sms-code" placeholder="Код подтверждения" style="display:none">
+        <button id="btn-verify-code" style="display:none">Подтвердить</button>
+    </div>
 
-            useEffect(() => {
-                if (!user) return;
-                const q = window.fb.query(window.fb.collection(window.db, "conversations"), window.fb.where("participants", "array-contains", user.username));
-                return window.fb.onSnapshot(q, (snap) => {
-                    const list = [];
-                    snap.forEach(doc => list.push({ id: doc.id, ...doc.data(), other: doc.data().participants.find(p => p !== user.username) }));
-                    setChats(list);
-                });
-            }, [user]);
-
-            useEffect(() => {
-                if (!activeChat) return;
-                const q = window.fb.query(window.fb.collection(window.db, "conversations", activeChat.id, "messages"), window.fb.orderBy("timestamp", "asc"));
-                return window.fb.onSnapshot(q, (snap) => {
-                    const m = [];
-                    snap.forEach(d => m.push({ id: d.id, ...d.data() }));
-                    setMessages(m);
-                });
-            }, [activeChat]);
-
-            const sendMessage = async () => {
-                if (!input.trim() || !activeChat) return;
-                const text = input; setInput('');
-                const chatRef = window.fb.doc(window.db, "conversations", activeChat.id);
-                await window.fb.addDoc(window.fb.collection(chatRef, "messages"), {
-                    text, sender: user.username, timestamp: window.fb.serverTimestamp()
-                });
-                await window.fb.updateDoc(chatRef, { lastMsg: text, lastUpdate: window.fb.serverTimestamp() });
-            };
-
-            const addAccount = () => {
-                const name = prompt("Имя:");
-                const username = prompt("@username:").replace('@','').toLowerCase();
-                if(name && username) {
-                    const newAccs = [...accounts, { name, username }];
-                    setAccounts(newAccs);
-                    localStorage.setItem('pixel_accounts', JSON.stringify(newAccs));
-                }
-            };
-
-            if (!user) return <div className="h-screen flex items-center justify-center"><button onClick={addAccount} className="bg-blue-600 p-4 rounded-xl">Создать аккаунт</button></div>;
-
-            return (
-                <div className="flex h-screen w-full">
-                    {/* LEFT SIDEBAR */}
-                    <div className="sidebar glass flex flex-col">
-                        <div className="p-4 flex items-center justify-between border-b border-white/5">
-                            <div className="flex gap-2">
-                                {accounts.map((acc, i) => (
-                                    <div key={i} onClick={() => {setActiveIdx(i); setView('chats');}} className={`w-9 h-9 rounded-full cursor-pointer flex items-center justify-center font-bold text-xs ${activeIdx === i ? 'ring-2 ring-blue-500 bg-blue-600' : 'bg-gray-700'}`}>{acc.name[0]}</div>
-                                ))}
-                                <div onClick={addAccount} className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center cursor-pointer">+</div>
-                            </div>
-                            <div onClick={() => setView(view === 'chats' ? 'settings' : 'chats')} className="cursor-pointer text-gray-400 hover:text-white transition">
-                                <i className={`fa-solid ${view === 'chats' ? 'fa-gear' : 'fa-arrow-left'} text-xl`}></i>
-                            </div>
-                        </div>
-
-                        {view === 'chats' ? (
-                            <div className="flex-1 overflow-y-auto">
-                                <div className="p-4 font-bold text-blue-400 uppercase text-xs tracking-widest opacity-50">Чаты</div>
-                                {chats.map(chat => (
-                                    <div key={chat.id} onClick={() => setActiveChat(chat)} className={`p-4 flex items-center cursor-pointer ${activeChat?.id === chat.id ? 'bg-[#2b5278]' : 'hover:bg-white/5'}`}>
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-800 mr-3 flex items-center justify-center font-bold">{chat.other[0].toUpperCase()}</div>
-                                        <div className="flex-1 truncate">
-                                            <div className="text-sm font-bold">@{chat.other}</div>
-                                            <div className="text-xs text-gray-400 truncate">{chat.lastMsg}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex-1 overflow-y-auto p-2">
-                                <div className="p-6 text-center">
-                                    <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold">{user.name[0]}</div>
-                                    <div className="text-xl font-bold">{user.name}</div>
-                                    <div className="text-gray-500 text-sm">@{user.username}</div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="p-2 text-xs font-bold text-blue-500 uppercase ml-4 mt-4">Настройки</div>
-                                    <div className="setting-item"><div className="setting-icon bg-blue-500"><i className="fa-solid fa-bell"></i></div><span>Уведомления и звуки</span></div>
-                                    <div className="setting-item"><div className="setting-icon bg-green-500"><i className="fa-solid fa-lock"></i></div><span>Конфиденциальность</span></div>
-                                    <div className="setting-item"><div className="setting-icon bg-yellow-500"><i className="fa-solid fa-database"></i></div><span>Данные и память</span></div>
-                                    <div className="setting-item"><div className="setting-icon bg-purple-500"><i className="fa-solid fa-folder"></i></div><span>Папки с чатами</span></div>
-                                    
-                                    <div className="p-2 text-xs font-bold text-red-500 uppercase ml-4 mt-4">Опасная зона</div>
-                                    <div className="setting-item text-red-400" onClick={() => {localStorage.clear(); location.reload();}}>
-                                        <div className="setting-icon bg-red-900/30 text-red-500"><i className="fa-solid fa-right-from-bracket"></i></div>
-                                        <span>Выйти из всех аккаунтов</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* CHAT AREA */}
-                    <div className="flex-1 flex flex-col bg-[#0e1621]">
-                        {activeChat ? (
-                            <>
-                                <div className="h-16 bg-[#17212b] flex items-center px-6 justify-between border-b border-black/20">
-                                    <div className="font-bold">@{activeChat.other}</div>
-                                    <i className="fa-solid fa-magnifying-glass text-gray-500 cursor-pointer"></i>
-                                </div>
-                                <div className="flex-1 overflow-y-auto p-6 flex flex-col">
-                                    {messages.map((m, i) => (
-                                        <div key={i} className={`msg ${m.sender === user.username ? 'msg-out' : 'msg-in'}`}>{m.text}</div>
-                                    ))}
-                                </div>
-                                <div className="p-4 bg-[#17212b] flex gap-4">
-                                    <input className="flex-1 bg-transparent outline-none" placeholder="Написать..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} />
-                                    <button onClick={sendMessage} className="text-blue-400 font-bold uppercase text-xs">Отправить</button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex-1 flex items-center justify-center opacity-10 flex-col">
-                                <i className="fa-solid fa-paper-plane text-9xl mb-4"></i>
-                                <span className="text-xl">Выберите чат или откройте настройки</span>
-                            </div>
-                        )}
-                    </div>
+    <div id="main-screen">
+        <div id="sidebar">
+            <div class="chat-header">Pixel Чаты</div>
+            <div id="chat-list">
+                <div class="chat-item" style="border-left: 4px solid var(--accent)">
+                    <strong>Общий канал</strong><br>
+                    <small style="opacity:0.6">Все пользователи Pixel</small>
                 </div>
-            );
-        };
+            </div>
+        </div>
+        <div id="chat-area">
+            <div id="messages-container"></div>
+            <div id="input-area">
+                <input type="text" id="msg-input" placeholder="Напишите сообщение...">
+                <button id="btn-send">📡</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Твой конфиг Pixel
+    const firebaseConfig = {
+        apiKey: "AIzaSyB7C-GHyn0RsNBek4wmkzMzD_IAbim0DpU",
+        authDomain: "pixel-7c9f0.firebaseapp.com",
+        projectId: "pixel-7c9f0",
+        storageBucket: "pixel-7c9f0.firebasestorage.app",
+        messagingSenderId: "1016081455742",
+        appId: "1:1016081455742:web:8b6d312cfecd8d8467d62f",
+        measurementId: "G-E35TB02ENB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let confirmationResult;
+    let currentUser = null;
+
+    // Инициализация ReCaptcha
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+
+    // Отправка SMS
+    document.getElementById('btn-send-code').onclick = async () => {
+        const phone = document.getElementById('phone-number').value;
+        if(!phone) return alert("Введите номер!");
+        
+        try {
+            confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+            document.getElementById('phone-number').style.display = 'none';
+            document.getElementById('btn-send-code').style.display = 'none';
+            document.getElementById('sms-code').style.display = 'block';
+            document.getElementById('btn-verify-code').style.display = 'block';
+        } catch (err) {
+            alert("Ошибка: " + err.message);
+        }
+    };
+
+    // Проверка кода
+    document.getElementById('btn-verify-code').onclick = async () => {
+        const code = document.getElementById('sms-code').value;
+        try {
+            const result = await confirmationResult.confirm(code);
+            currentUser = result.user;
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'flex';
+            loadMessages();
+        } catch (err) {
+            alert("Неверный код!");
+        }
+    };
+
+    // Отправка сообщения
+    async function sendMessage() {
+        const text = document.getElementById('msg-input').value;
+        if (!text.trim()) return;
+        
+        await addDoc(collection(db, "global_chat"), {
+            uid: currentUser.uid,
+            phone: currentUser.phoneNumber,
+            text: text,
+            timestamp: serverTimestamp()
+        });
+        document.getElementById('msg-input').value = "";
+    }
+
+    // Загрузка сообщений в реальном времени
+    function loadMessages() {
+        const q = query(collection(db, "global_chat"), orderBy("timestamp", "asc"));
+        onSnapshot(q, (snapshot) => {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const msgDiv = document.createElement('div');
+                const isMe = data.uid === currentUser.uid;
+                msgDiv.className = `msg ${isMe ? 'me' : 'other'}`;
+                
+                // Время или галочка
+                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
+                
+                msgDiv.innerHTML = `
+                    <div style="font-size: 10px; opacity: 0.6; margin-bottom: 3px;">${isMe ? 'Вы' : data.phone}</div>
+                    ${data.text} 
+                    <span class="status">${isMe ? '✓✓' : ''} ${time}</span>
+                `;
+                container.appendChild(msgDiv);
+            });
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    document.getElementById('btn-send').onclick = sendMessage;
+    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+</script>
+
+<script>
+    function toggleTheme() {
+        const body = document.body;
+        body.getAttribute('data-theme') === 'dark' ? body.removeAttribute('data-theme') : body.setAttribute('data-theme', 'dark');
+    }
+</script>
+
 </body>
 </html>
